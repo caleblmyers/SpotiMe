@@ -1,106 +1,146 @@
 <template>
-  <div class="w-full max-w-full min-w-0 bg-white rounded-lg shadow-md p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-bold">Top Tracks</h2>
-      <div v-if="totalPages > 1" class="flex items-center gap-2">
-        <button @click="goToPreviousPage" :disabled="currentPage === 1 || isLoading"
-          class="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition">
-          Previous
-        </button>
-        <span class="text-sm text-gray-600">
-          Page {{ currentPage }} of {{ totalPages }}
-        </span>
-        <button @click="goToNextPage" :disabled="currentPage === totalPages || isLoading"
-          class="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition">
-          Next
-        </button>
+  <DataSection
+    title="Top Tracks"
+    :is-loading="isLoading"
+    :error="error"
+    loading-message="Loading tracks..."
+    empty-message="No tracks found"
+    :show-empty="!tracks || tracks.length === 0"
+    :on-retry="() => fetchTopTracks()"
+  >
+    <!-- Top 5 Tracks -->
+    <div
+      v-if="topTracks && topTracks.length > 0"
+      class="space-y-3 mb-6 w-full max-w-full min-w-0"
+    >
+      <div
+        v-for="(track, index) in topTracks"
+        :key="track.id"
+        class="bg-gray-50 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow w-full min-w-0 flex items-center gap-4 p-4"
+      >
+        <!-- Number Badge -->
+        <div class="shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white font-bold text-lg">
+          {{ index + 1 }}
+        </div>
+
+        <!-- Album Art -->
+        <div class="shrink-0 w-20 h-20 bg-gray-200 rounded-lg overflow-hidden">
+          <img
+            v-if="track.album?.images && track.album.images[0]"
+            :src="track.album.images[0].url"
+            :alt="track.album.name"
+            class="w-full h-full object-cover"
+          />
+          <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+            No Art
+          </div>
+        </div>
+
+        <!-- Track Info -->
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-base text-gray-900 truncate mb-1" :title="track.name">
+            {{ track.name }}
+          </div>
+          <div class="text-sm text-gray-600 truncate" :title="track.album?.name">
+            {{ track.album?.name || 'Unknown Album' }}
+          </div>
+        </div>
+
+        <!-- Duration -->
+        <div class="shrink-0 text-base text-gray-600 font-medium">
+          {{ formatDuration(track.duration_ms) }}
+        </div>
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex justify-center items-center py-12">
-      <p class="text-gray-500">Loading tracks...</p>
-    </div>
+    <!-- Remaining Tracks List (Paginated) -->
+    <div v-if="remainingTracks.length > 0" class="mt-6">
+      <div class="flex items-center justify-end mb-4">
+        <Pagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :disabled="isLoading"
+          @next="goToNextPage"
+          @previous="goToPreviousPage"
+        />
+      </div>
+      <div
+        v-if="paginatedRemainingTracks && paginatedRemainingTracks.length > 0"
+        class="space-y-2 w-full max-w-full min-w-0"
+      >
+      <div
+        v-for="track in paginatedRemainingTracks"
+        :key="track.id"
+        class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors w-full min-w-0"
+      >
+        <!-- Album Art -->
+        <div class="shrink-0">
+          <div class="w-16 h-16 bg-gray-200 rounded overflow-hidden">
+            <img
+              v-if="track.album?.images && track.album.images[0]"
+              :src="track.album.images[0].url"
+              :alt="track.album.name"
+              class="w-full h-full object-cover"
+            />
+            <div
+              v-else
+              class="w-full h-full flex items-center justify-center text-gray-400 text-xs"
+            >
+              No Art
+            </div>
+          </div>
+        </div>
 
-    <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-800">{{ error }}</p>
-      <button @click="() => fetchTopTracks()"
-        class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
-        Retry
-      </button>
-    </div>
+        <!-- Track Info -->
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-sm text-gray-900 truncate" :title="track.name">
+            {{ track.name }}
+          </div>
+          <div class="text-xs text-gray-600 truncate" :title="track.album?.name">
+            {{ track.album?.name || 'Unknown Album' }}
+          </div>
+        </div>
 
-    <!-- Tracks Table -->
-    <div v-else-if="paginatedTracks && paginatedTracks.length > 0" class="overflow-x-auto w-full max-w-full">
-      <table class="w-full border-collapse overflow-hidden">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-b">Track</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700 border-b">Album</th>
-            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-700 border-b">Duration</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="track in paginatedTracks" :key="track.id" class="hover:bg-gray-50 transition-colors">
-            <td class="px-3 py-2 text-sm text-gray-900">
-              <div class="font-medium">{{ track.name }}</div>
-            </td>
-            <td class="px-3 py-2 text-sm text-gray-600">
-              {{ track.album?.name || 'Unknown Album' }}
-            </td>
-            <td class="px-3 py-2 text-sm text-gray-600 text-right">
-              {{ formatDuration(track.duration_ms) }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <!-- Duration -->
+        <div class="shrink-0 text-sm text-gray-600">
+          {{ formatDuration(track.duration_ms) }}
+        </div>
+      </div>
     </div>
-
-    <!-- Empty State -->
-    <div v-else class="text-center py-12">
-      <p class="text-gray-500">No tracks found</p>
     </div>
-  </div>
+  </DataSection>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useTopTracks } from '../composables/useTopTracks';
+import { usePagination } from '../composables/usePagination';
+import { formatDuration } from '../utils/format';
+import DataSection from './DataSection.vue';
+import Pagination from './Pagination.vue';
 
 const ITEMS_PER_PAGE = 10;
+const TOP_TRACKS_COUNT = 5;
 const { tracks, isLoading, error, fetchTopTracks } = useTopTracks({ limit: 50 });
 
-const currentPage = ref(1);
-
-const totalPages = computed(() => {
-  if (!tracks.value) return 0;
-  return Math.ceil(tracks.value.length / ITEMS_PER_PAGE);
-});
-
-const paginatedTracks = computed(() => {
+// Extract top 5 tracks
+const topTracks = computed(() => {
   if (!tracks.value) return [];
-  const start = (currentPage.value - 1) * ITEMS_PER_PAGE;
-  const end = start + ITEMS_PER_PAGE;
-  return tracks.value.slice(start, end);
+  return tracks.value.slice(0, TOP_TRACKS_COUNT);
 });
 
-function goToNextPage() {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-}
+// Get remaining tracks (after top 5)
+const remainingTracks = computed(() => {
+  if (!tracks.value) return [];
+  return tracks.value.slice(TOP_TRACKS_COUNT);
+});
 
-function goToPreviousPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-}
-
-function formatDuration(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}
+// Apply pagination to remaining tracks only
+const {
+  currentPage,
+  totalPages,
+  paginatedData: paginatedRemainingTracks,
+  goToNextPage,
+  goToPreviousPage,
+} = usePagination(remainingTracks, ITEMS_PER_PAGE);
 </script>

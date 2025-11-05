@@ -25,10 +25,8 @@ export function useAuthCallback() {
 
       // Set profile with spotify_id if provided (ensures user.id is set for isAuthenticated check)
       if (tokens.spotify_id) {
-        user.setSpotifyProfile({
-          id: tokens.spotify_id,
-          display_name: "",
-        });
+        // Set ID directly to ensure isAuthenticated works before fetching full profile
+        user.id = tokens.spotify_id;
       }
 
       // Fetch full profile and wait for it to complete
