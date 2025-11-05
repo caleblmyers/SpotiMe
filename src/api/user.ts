@@ -1,8 +1,9 @@
 import axios from "axios";
+import { API_BASE_URL } from "../constants/api";
 
 export async function login(email: string, password: string) {
   const res = await axios.post(
-    `http://localhost:4000/auth/login`,
+    `${API_BASE_URL}/auth/login`,
     { email, password },
     { withCredentials: true }
   );
@@ -13,7 +14,7 @@ export async function login(email: string, password: string) {
 
 export async function signUp(email: string, password: string) {
   const res = await axios.post(
-    `http://localhost:4000/auth/signup`,
+    `${API_BASE_URL}/auth/signup`,
     { email, password },
     { withCredentials: true }
   );

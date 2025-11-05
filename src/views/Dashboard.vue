@@ -1,29 +1,17 @@
 <template>
-  <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Welcome, {{ user.displayName }}</h1>
+  <div class="w-full max-w-full min-w-0">
+    <div class="text-2xl font-bold mb-4">Welcome, {{ user.displayName }}</div>
+    <TopArtists />
+    <div class="mt-8">
+      <TopTracks />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from "vue";
 import { useUserStore } from "../store/user";
-import { getTopTracks, getTopArtists } from "../api/spotify";
+import TopArtists from "../components/TopArtists.vue";
+import TopTracks from "../components/TopTracks.vue";
 
 const user = useUserStore();
-const topTracks = ref([]);
-const topArtists = ref([]);
-const timeRange = ref("short_term");
-
-async function fetchStats() {
-  if (!user.spotifyId) return;
-  topTracks.value = await getTopTracks(user.spotifyId, timeRange.value);
-  topArtists.value = await getTopArtists(user.spotifyId, timeRange.value);
-}
-
-onMounted(async () => {
-  await user.fetchUser();
-  await fetchStats();
-});
-
-watch(timeRange, fetchStats);
 </script>

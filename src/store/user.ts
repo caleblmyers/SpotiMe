@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
+import { API_BASE_URL } from "../constants/api";
 
 interface UserState {
   email: string | null;
@@ -32,13 +33,12 @@ export const useUserStore = defineStore("user", {
       }
 
       try {
-        const res = await axios.get("http://localhost:4000/auth/me", {
+        const res = await axios.get(`${API_BASE_URL}/auth/me`, {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(res.data);
         this.email = res.data.email;
         this.id = res.data.id;
         this.spotifyId = res.data.spotifyId;
@@ -59,13 +59,12 @@ export const useUserStore = defineStore("user", {
       }
 
       try {
-        const res = await axios.get("http://localhost:4000/auth/me", {
+        const res = await axios.get(`${API_BASE_URL}/auth/me`, {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(res.data);
         this.email = res.data.email;
         this.id = res.data.id;
         this.spotifyId = res.data.spotifyId;
