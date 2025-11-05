@@ -73,15 +73,33 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useTopArtists } from '../composables/useTopArtists';
 import { usePagination } from '../composables/usePagination';
+import type { TimeRange } from '../types/spotify';
 import DataSection from './DataSection.vue';
 import Pagination from './Pagination.vue';
+
+interface Props {
+  timeRange?: TimeRange;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  timeRange: 'medium_term',
+});
 
 const ITEMS_PER_PAGE = 10;
 const TOP_ARTISTS_COUNT = 5;
 const { artists, isLoading, error, fetchTopArtists } = useTopArtists({ limit: 50 });
+
+// Watch for time range changes and refetch
+watch(
+  () => props.timeRange,
+  (newTimeRange) => {
+    fetchTopArtists({ time_range: newTimeRange, limit: 50 });
+  },
+  { immediate: true }
+);
 
 // Extract top 5 artists
 const topArtists = computed(() => {

@@ -112,16 +112,34 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useTopTracks } from '../composables/useTopTracks';
 import { usePagination } from '../composables/usePagination';
 import { formatDuration } from '../utils/format';
+import type { TimeRange } from '../types/spotify';
 import DataSection from './DataSection.vue';
 import Pagination from './Pagination.vue';
+
+interface Props {
+  timeRange?: TimeRange;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  timeRange: 'medium_term',
+});
 
 const ITEMS_PER_PAGE = 10;
 const TOP_TRACKS_COUNT = 5;
 const { tracks, isLoading, error, fetchTopTracks } = useTopTracks({ limit: 50 });
+
+// Watch for time range changes and refetch
+watch(
+  () => props.timeRange,
+  (newTimeRange) => {
+    fetchTopTracks({ time_range: newTimeRange, limit: 50 });
+  },
+  { immediate: true }
+);
 
 // Extract top 5 tracks
 const topTracks = computed(() => {

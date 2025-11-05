@@ -1,7 +1,12 @@
 <template>
   <div class="w-full max-w-full min-w-0">
     <!-- Not Authenticated State -->
-    <Welcome v-if="!isAuthenticated" />
+    <div v-if="!isAuthenticated" class="flex flex-col items-center justify-center min-h-[60vh]">
+      <div class="text-center max-w-md px-4">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">Please log in to view graphs</h1>
+        <p class="text-gray-600">Connect your Spotify account to see your listening statistics.</p>
+      </div>
+    </div>
 
     <!-- Authenticated State -->
     <div v-else class="space-y-4">
@@ -14,17 +19,15 @@
         <TimeRangeSelector v-model="timeRange" />
       </div>
 
-      <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <!-- Left Column (40%) - Top Tracks -->
-        <div class="lg:col-span-2">
-          <TopTracks :time-range="timeRange" />
-        </div>
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GenresChart :time-range="timeRange" />
+        <ArtistsChart :time-range="timeRange" />
+      </div>
 
-        <!-- Right Column (60%) - Top Artists -->
-        <div class="lg:col-span-3">
-          <TopArtists :time-range="timeRange" />
-        </div>
+      <!-- Radar Chart Row -->
+      <div class="grid grid-cols-1 gap-6">
+        <GenresRadarChart />
       </div>
     </div>
   </div>
@@ -36,10 +39,10 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from "../store/user";
 import { useProfile } from "../composables/useProfile";
 import type { TimeRange } from "../types/spotify";
-import Welcome from "../components/Welcome.vue";
-import TopArtists from "../components/TopArtists.vue";
-import TopTracks from "../components/TopTracks.vue";
 import UserProfile from "../components/UserProfile.vue";
+import GenresChart from "../components/GenresChart.vue";
+import ArtistsChart from "../components/ArtistsChart.vue";
+import GenresRadarChart from "../components/GenresRadarChart.vue";
 import TimeRangeSelector from "../components/TimeRangeSelector.vue";
 
 const userStore = useUserStore();
@@ -52,3 +55,4 @@ const { profile } = useProfile();
 // Time range state
 const timeRange = ref<TimeRange>('short_term');
 </script>
+

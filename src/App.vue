@@ -7,6 +7,22 @@
           <router-link to="/" class="text-xl sm:text-2xl font-bold hover:opacity-80 transition whitespace-nowrap">
             SpotiMe
           </router-link>
+          <nav v-if="isAuthenticated" class="flex items-center gap-3 sm:gap-4 ml-2 sm:ml-4">
+            <router-link
+              to="/"
+              class="text-sm px-2 py-1 rounded hover:bg-green-700 transition whitespace-nowrap"
+              active-class="bg-green-700 font-semibold"
+            >
+              Dashboard
+            </router-link>
+            <router-link
+              to="/graphs"
+              class="text-sm px-2 py-1 rounded hover:bg-green-700 transition whitespace-nowrap"
+              active-class="bg-green-700 font-semibold"
+            >
+              Graphs
+            </router-link>
+          </nav>
         </div>
         <div class="flex items-center gap-2 shrink-0 min-w-0">
           <template v-if="isAuthenticated">
