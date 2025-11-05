@@ -1,0 +1,64 @@
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { parseTokensFromUrl } from "../api/spotify";
+import { useUserStore } from "../store/user";
+
+export function useAuthCallback() {
+  const router = useRouter();
+  const user = useUserStore();
+
+  const loading = ref(true);
+  const error = ref<string | null>(null);
+  const success = ref(false);
+
+  async function handleCallback(): Promise<void> {
+    try {
+      // Parse tokens from URL
+      const tokens = parseTokensFromUrl();
+
+      if (!tokens) {
+        throw new Error("No tokens found in callback URL");
+      }
+
+      // Set tokens in localStorage
+      user.setSpotifyTokens(tokens.access_token, tokens.refresh_token);
+
+      // Set profile with spotify_id if provided (ensures user.id is set for isAuthenticated check)
+      if (tokens.spotify_id) {
+        user.setSpotifyProfile({
+          id: tokens.spotify_id,
+          display_name: "",
+        });
+      }
+
+      // Fetch full profile and wait for it to complete
+      await user.fetchSpotifyProfile();
+
+      // Mark as successful and show success message
+      loading.value = false;
+      success.value = true;
+    } catch (err) {
+      console.error("Failed to handle Spotify callback:", err);
+      error.value =
+        err instanceof Error
+          ? err.message
+          : "Failed to complete authentication";
+      loading.value = false;
+    }
+  }
+
+  function redirectToHome(): void {
+    router.replace("/");
+  }
+
+  onMounted(() => {
+    handleCallback();
+  });
+
+  return {
+    loading,
+    error,
+    success,
+    redirectToHome,
+  };
+}

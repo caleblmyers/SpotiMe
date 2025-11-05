@@ -7,28 +7,18 @@
           <router-link to="/" class="text-xl sm:text-2xl font-bold hover:opacity-80 transition whitespace-nowrap">
             SpotiMe
           </router-link>
-          <router-link v-if="user.email" to="/dashboard"
-            class="px-3 py-1 rounded hover:bg-green-500 transition text-sm whitespace-nowrap">
-            Dashboard
-          </router-link>
         </div>
         <div class="flex items-center gap-2 shrink-0 min-w-0">
-          <template v-if="user.email">
-            <span class="text-sm truncate min-w-0">{{ user.displayName || user.email }}</span>
-            <button @click="handleLogout" class="px-4 py-1 rounded bg-green-700 hover:bg-green-800 transition text-sm whitespace-nowrap shrink-0">
+          <template v-if="isAuthenticated">
+            <button @click="handleLogout"
+              class="px-4 py-1 rounded bg-green-700 hover:bg-green-800 transition text-sm whitespace-nowrap shrink-0">
               Logout
             </button>
           </template>
           <template v-else>
-            <input v-model="username" type="text" placeholder="Username"
-              class="px-3 py-1 rounded text-gray-900 text-sm min-w-0 flex-1" />
-            <input v-model="password" type="password" placeholder="Password"
-              class="px-3 py-1 rounded text-gray-900 text-sm min-w-0 flex-1" />
-            <button @click="handleLogin" class="px-4 py-1 rounded bg-green-700 hover:bg-green-800 transition text-sm whitespace-nowrap shrink-0">
-              Login
-            </button>
-            <button @click="handleSignUp" class="px-4 py-1 rounded bg-green-700 hover:bg-green-800 transition text-sm whitespace-nowrap shrink-0">
-              Sign Up
+            <button @click="connectWithSpotify"
+              class="px-4 py-2 rounded bg-green-500 hover:bg-green-600 transition text-sm whitespace-nowrap shrink-0">
+              Connect with Spotify
             </button>
           </template>
         </div>
@@ -50,60 +40,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { login, signUp } from './api/user';
+import { storeToRefs } from 'pinia';
 import { useUserStore } from './store/user';
-
-const router = useRouter();
+import { useAuthRestore } from './composables/useAuthRestore';
+import { loginSpotify } from './api/spotify';
 
 const user = useUserStore();
-const username = ref('');
-const password = ref('');
-const hasInitialized = ref(false);
+const { isAuthenticated } = storeToRefs(user);
 
-onMounted(async () => {
-  if (!hasInitialized.value && !user.email) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        await user.fetchCurrentUser();
-      } catch (err) {
-        console.error("Failed to fetch current user:", err);
-      }
-    }
-    hasInitialized.value = true;
-  }
-});
+useAuthRestore();
 
-async function handleLogin(): Promise<void> {
-  try {
-    const response = await login(username.value, password.value);
-    user.setUserData(username.value, response);
-    username.value = '';
-    password.value = '';
-    await user.fetchCurrentUser();
-  } catch (err) {
-    console.error("Failed to login:", err);
-  }
+async function connectWithSpotify(): Promise<void> {
+  await loginSpotify();
 }
 
-async function handleSignUp(): Promise<void> {
-  try {
-    const response = await signUp(username.value, password.value);
-    user.setUserData(username.value, response);
-    username.value = '';
-    password.value = '';
-    await user.fetchCurrentUser();
-  } catch (err) {
-    console.error("Failed to sign up:", err);
-  }
-}
-
-function handleLogout() {
-  localStorage.removeItem('token');
+function handleLogout(): void {
   user.clearUser();
-  router.push('/');
 }
 </script>
-

@@ -56,20 +56,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue';
-import { getTopTracks } from '../api/spotify';
-import { useAsyncData } from '../composables/useAsyncData';
+import { useTopTracks } from '../composables/useTopTracks';
 
-interface Track {
-  id: string;
-  name: string;
-  duration_ms: number;
-  album?: {
-    name: string;
-  };
-}
-
-const { data: tracks, loading, error, execute } = useAsyncData<Track>();
+const { tracks, loading, error, fetchTopTracks } = useTopTracks();
 
 function formatDuration(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -77,13 +66,5 @@ function formatDuration(ms: number): string {
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
-
-async function fetchTopTracks(): Promise<void> {
-  await execute(() => getTopTracks() as Promise<Track[]>, 'Failed to fetch top tracks');
-}
-
-onMounted(() => {
-  fetchTopTracks();
-});
 </script>
 

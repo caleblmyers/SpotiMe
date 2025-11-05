@@ -76,25 +76,8 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue';
-import { getTopArtists } from '../api/spotify';
-import { useAsyncData } from '../composables/useAsyncData';
+import { useTopArtists } from '../composables/useTopArtists';
 
-interface Artist {
-  id: string;
-  name: string;
-  images?: Array<{ url: string }>;
-  genres?: string[];
-}
-
-const { data: artists, loading, error, execute } = useAsyncData<Artist>();
-
-async function fetchTopArtists(): Promise<void> {
-  await execute(() => getTopArtists() as Promise<Artist[]>, 'Failed to fetch top artists');
-}
-
-onMounted(() => {
-  fetchTopArtists();
-});
+const { artists, loading, error, fetchTopArtists } = useTopArtists();
 </script>
 
