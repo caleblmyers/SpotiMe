@@ -1,30 +1,32 @@
-import { onMounted } from 'vue';
-import { getTopArtists } from '../api/spotify';
-import { useAsyncData } from './useAsyncData';
+import { onMounted } from "vue";
+import { useApi } from "./useApi";
+import type { SpotifyArtist } from "../types/spotify";
+import type { TimeRange } from "../types/spotify";
 
-interface Artist {
-  id: string;
-  name: string;
-  images?: Array<{ url: string }>;
-  genres?: string[];
+export interface TopArtistsParams {
+  limit?: number;
+  offset?: number;
+  time_range?: TimeRange;
 }
 
-export function useTopArtists() {
-  const { data: artists, loading, error, execute } = useAsyncData<Artist>();
+export function useTopArtists(defaultParams?: TopArtistsParams) {
+  const { data, isLoading, error, fetchData } = useApi<SpotifyArtist[]>(
+    "/api/top-artists",
+    defaultParams as Record<string, unknown> | undefined
+  );
 
-  async function fetchTopArtists(): Promise<void> {
-    await execute(() => getTopArtists() as Promise<Artist[]>, 'Failed to fetch top artists');
-  }
-
+  // Auto-fetch on mount
   onMounted(() => {
-    fetchTopArtists();
+    if (!data.value) {
+      fetchData(defaultParams as Record<string, unknown> | undefined);
+    }
   });
 
   return {
-    artists,
-    loading,
+    artists: data,
+    isLoading,
     error,
-    fetchTopArtists,
+    fetchTopArtists: (params?: TopArtistsParams) =>
+      fetchData(params as Record<string, unknown> | undefined),
   };
 }
-

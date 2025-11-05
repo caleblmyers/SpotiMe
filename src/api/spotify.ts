@@ -10,7 +10,7 @@ interface SpotifyApiParams {
 
 async function getAccessToken(): Promise<string> {
   const accessToken = localStorage.getItem("spotify_access_token");
-  
+
   if (!accessToken) {
     throw new Error("No Spotify access token found");
   }
@@ -27,7 +27,8 @@ function buildParams(params: SpotifyApiParams): Record<string, unknown> {
   const queryParams: Record<string, unknown> = {};
   if (params.limit !== undefined) queryParams.limit = params.limit;
   if (params.offset !== undefined) queryParams.offset = params.offset;
-  if (params.time_range !== undefined) queryParams.time_range = params.time_range;
+  if (params.time_range !== undefined)
+    queryParams.time_range = params.time_range;
   return queryParams;
 }
 
@@ -37,11 +38,11 @@ async function makeAuthenticatedRequest<T>(
 ): Promise<T> {
   const accessToken = await getAccessToken();
   const spotifyId = getSpotifyId();
-  
+
   const headers: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
   };
-  
+
   // Include x-spotify-id header if available (optional, for automatic refresh)
   if (spotifyId) {
     headers["x-spotify-id"] = spotifyId;
@@ -86,10 +87,14 @@ export async function loginSpotify(): Promise<void> {
   window.location.href = res.data.url;
 }
 
-export function parseTokensFromUrl(): { access_token: string; refresh_token: string; spotify_id?: string } | null {
+export function parseTokensFromUrl(): {
+  access_token: string;
+  refresh_token: string;
+  spotify_id?: string;
+} | null {
   const urlParams = new URLSearchParams(window.location.search);
   const tokensParam = urlParams.get("tokens");
-  
+
   if (!tokensParam) {
     return null;
   }

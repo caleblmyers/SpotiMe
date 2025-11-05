@@ -1,32 +1,32 @@
-import { onMounted } from 'vue';
-import { getTopTracks } from '../api/spotify';
-import { useAsyncData } from './useAsyncData';
+import { onMounted } from "vue";
+import { useApi } from "./useApi";
+import type { SpotifyTrack } from "../types/spotify";
+import type { TimeRange } from "../types/spotify";
 
-interface Track {
-  id: string;
-  name: string;
-  duration_ms: number;
-  album?: {
-    name: string;
-  };
+export interface TopTracksParams {
+  limit?: number;
+  offset?: number;
+  time_range?: TimeRange;
 }
 
-export function useTopTracks() {
-  const { data: tracks, loading, error, execute } = useAsyncData<Track>();
+export function useTopTracks(defaultParams?: TopTracksParams) {
+  const { data, isLoading, error, fetchData } = useApi<SpotifyTrack[]>(
+    "/api/top-tracks",
+    defaultParams as Record<string, unknown> | undefined
+  );
 
-  async function fetchTopTracks(): Promise<void> {
-    await execute(() => getTopTracks() as Promise<Track[]>, 'Failed to fetch top tracks');
-  }
-
+  // Auto-fetch on mount
   onMounted(() => {
-    fetchTopTracks();
+    if (!data.value) {
+      fetchData(defaultParams as Record<string, unknown> | undefined);
+    }
   });
 
   return {
-    tracks,
-    loading,
+    tracks: data,
+    isLoading,
     error,
-    fetchTopTracks,
+    fetchTopTracks: (params?: TopTracksParams) =>
+      fetchData(params as Record<string, unknown> | undefined),
   };
 }
-

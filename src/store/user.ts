@@ -1,13 +1,8 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 import { API_BASE_URL } from "../constants/api";
-
-interface SpotifyProfile {
-  id: string;
-  display_name: string;
-  email?: string;
-  images?: Array<{ url: string }>;
-}
+import { makeAuthenticatedRequest } from "../composables/useApi";
+import type { SpotifyUser } from "../types/spotify";
 
 interface UserState {
   id: string | null;
@@ -30,7 +25,7 @@ export const useUserStore = defineStore("user", {
     },
   },
   actions: {
-    setSpotifyProfile(profile: SpotifyProfile): void {
+    setSpotifyProfile(profile: SpotifyUser): void {
       this.id = profile.id;
       this.displayName = profile.display_name || null;
       this.email = profile.email || null;
@@ -57,7 +52,10 @@ export const useUserStore = defineStore("user", {
         if (newAccessToken) {
           localStorage.setItem("spotify_access_token", newAccessToken);
           if (res.data.refresh_token) {
-            localStorage.setItem("spotify_refresh_token", res.data.refresh_token);
+            localStorage.setItem(
+              "spotify_refresh_token",
+              res.data.refresh_token
+            );
           }
           return newAccessToken;
         }
@@ -68,67 +66,27 @@ export const useUserStore = defineStore("user", {
       return null;
     },
     async fetchSpotifyProfile(): Promise<void> {
-      const accessToken = localStorage.getItem("spotify_access_token");
-      if (!accessToken) {
-        throw new Error("No access token found");
-      }
-
-      const spotifyId = this.id;
-      const headers: Record<string, string> = {
-        Authorization: `Bearer ${accessToken}`,
-      };
-      if (spotifyId) {
-        headers["x-spotify-id"] = spotifyId;
-      }
-
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/me`, {
-          headers,
-          withCredentials: true,
-        });
-        
+        // Use the same authenticated request function as the composable
+        // Don't use cache for store to ensure fresh data
+        const profile = await makeAuthenticatedRequest<SpotifyUser>(
+          "/api/me",
+          undefined,
+          false
+        );
+
         // Ensure the response has the required data
-        if (!res.data || !res.data.id) {
+        if (!profile || !profile.id) {
           throw new Error("Invalid profile response: missing id");
         }
-        
-        this.setSpotifyProfile(res.data);
-        
+
+        this.setSpotifyProfile(profile);
+
         // Verify the profile was set correctly
-        if (!this.id || this.id !== res.data.id) {
+        if (!this.id || this.id !== profile.id) {
           throw new Error("Failed to set user profile in store");
         }
       } catch (err: unknown) {
-        // If token is invalid, try to refresh
-        const error = err as { response?: { status: number }; message?: string };
-        if (error.response?.status === 401) {
-          const newToken = await this.refreshAccessToken();
-          if (newToken) {
-            // Retry with new token
-            const retryHeaders: Record<string, string> = {
-              Authorization: `Bearer ${newToken}`,
-            };
-            if (spotifyId) {
-              retryHeaders["x-spotify-id"] = spotifyId;
-            }
-            const retryRes = await axios.get(`${API_BASE_URL}/api/me`, {
-              headers: retryHeaders,
-              withCredentials: true,
-            });
-            
-            if (!retryRes.data || !retryRes.data.id) {
-              throw new Error("Invalid profile response after refresh: missing id");
-            }
-            
-            this.setSpotifyProfile(retryRes.data);
-            
-            // Verify the profile was set correctly
-            if (!this.id || this.id !== retryRes.data.id) {
-              throw new Error("Failed to set user profile in store after refresh");
-            }
-            return;
-          }
-        }
         // If refresh fails or other error, clear user
         this.clearUser();
         throw err;
