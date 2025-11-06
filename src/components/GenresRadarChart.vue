@@ -6,11 +6,8 @@
     </div>
     <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
       <p class="text-red-800">{{ error }}</p>
-      <button
-        v-if="onRetry"
-        @click="onRetry"
-        class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-      >
+      <button v-if="onRetry" @click="onRetry"
+        class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
         Retry
       </button>
     </div>
@@ -24,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted } from 'vue';
 import { Radar } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -34,13 +31,13 @@ import {
   Filler,
   Tooltip,
   Legend,
+  type TooltipItem,
 } from 'chart.js';
 import { useTopArtists } from '../composables/useTopArtists';
-import type { TimeRange, SpotifyArtist } from '../types/spotify';
+import type { SpotifyArtist } from '../types/spotify';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
-const timeRanges: TimeRange[] = ['short_term', 'medium_term', 'long_term'];
 const timeRangeLabels = {
   short_term: 'Last 4 Weeks',
   medium_term: 'Last 6 Months',
@@ -52,11 +49,11 @@ const shortTerm = useTopArtists({ limit: 50, time_range: 'short_term' });
 const mediumTerm = useTopArtists({ limit: 50, time_range: 'medium_term' });
 const longTerm = useTopArtists({ limit: 50, time_range: 'long_term' });
 
-const isLoading = computed(() => 
+const isLoading = computed(() =>
   shortTerm.isLoading.value || mediumTerm.isLoading.value || longTerm.isLoading.value
 );
 
-const error = computed(() => 
+const error = computed(() =>
   shortTerm.error.value || mediumTerm.error.value || longTerm.error.value || null
 );
 
@@ -66,7 +63,7 @@ function processGenres(artists: SpotifyArtist[] | null): Record<string, number> 
   }
 
   const genreCounts: Record<string, number> = {};
-  
+
   artists.forEach((artist) => {
     if (artist.genres && artist.genres.length > 0) {
       artist.genres.forEach((genre) => {
@@ -97,7 +94,7 @@ const chartData = computed(() => {
   // Calculate total count for each genre across all time ranges
   const genreTotals: Record<string, number> = {};
   allGenres.forEach((genre) => {
-    genreTotals[genre] = 
+    genreTotals[genre] =
       (shortTermGenres[genre] || 0) +
       (mediumTermGenres[genre] || 0) +
       (longTermGenres[genre] || 0);
@@ -192,8 +189,10 @@ const chartOptions = {
     },
     tooltip: {
       callbacks: {
-        label: (context: { dataset: { label: string }; formattedValue: string }) => {
-          return `${context.dataset.label}: ${context.formattedValue} artist${context.formattedValue !== '1' ? 's' : ''}`;
+        label: (context: TooltipItem<'radar'>) => {
+          const label = context.dataset.label || '';
+          const value = context.formattedValue || '0';
+          return `${label}: ${value} artist${value !== '1' ? 's' : ''}`;
         },
       },
     },
@@ -211,4 +210,3 @@ const chartOptions = {
   },
 };
 </script>
-
