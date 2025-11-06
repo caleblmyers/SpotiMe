@@ -8,3 +8,10 @@ export function formatDuration(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
+/**
+ * Formats a number with comma separators
+ */
+export function formatNumber(num: number): string {
+  return num.toLocaleString();
+}
+
