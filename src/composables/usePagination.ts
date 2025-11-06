@@ -34,6 +34,10 @@ export function usePagination<T>(data: Ref<T[] | null>, itemsPerPage = 10) {
     }
   }
 
+  function reset(): void {
+    currentPage.value = 1;
+  }
+
   return {
     currentPage,
     totalPages,
@@ -41,6 +45,7 @@ export function usePagination<T>(data: Ref<T[] | null>, itemsPerPage = 10) {
     goToNextPage,
     goToPreviousPage,
     goToPage,
+    reset,
   };
 }
 

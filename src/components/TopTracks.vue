@@ -132,15 +132,6 @@ const ITEMS_PER_PAGE = 10;
 const TOP_TRACKS_COUNT = 5;
 const { tracks, isLoading, error, fetchTopTracks } = useTopTracks({ limit: 50 });
 
-// Watch for time range changes and refetch
-watch(
-  () => props.timeRange,
-  (newTimeRange) => {
-    fetchTopTracks({ time_range: newTimeRange, limit: 50 });
-  },
-  { immediate: true }
-);
-
 // Extract top 5 tracks
 const topTracks = computed(() => {
   if (!tracks.value) return [];
@@ -160,5 +151,16 @@ const {
   paginatedData: paginatedRemainingTracks,
   goToNextPage,
   goToPreviousPage,
+  reset: resetPagination,
 } = usePagination(remainingTracks, ITEMS_PER_PAGE);
+
+// Watch for time range changes and refetch
+watch(
+  () => props.timeRange,
+  (newTimeRange) => {
+    resetPagination();
+    fetchTopTracks({ time_range: newTimeRange, limit: 50 });
+  },
+  { immediate: true }
+);
 </script>

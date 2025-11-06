@@ -92,15 +92,6 @@ const ITEMS_PER_PAGE = 10;
 const TOP_ARTISTS_COUNT = 5;
 const { artists, isLoading, error, fetchTopArtists } = useTopArtists({ limit: 50 });
 
-// Watch for time range changes and refetch
-watch(
-  () => props.timeRange,
-  (newTimeRange) => {
-    fetchTopArtists({ time_range: newTimeRange, limit: 50 });
-  },
-  { immediate: true }
-);
-
 // Extract top 5 artists
 const topArtists = computed(() => {
   if (!artists.value) return [];
@@ -120,5 +111,16 @@ const {
   paginatedData: paginatedRemainingArtists,
   goToNextPage,
   goToPreviousPage,
+  reset: resetPagination,
 } = usePagination(remainingArtists, ITEMS_PER_PAGE);
+
+// Watch for time range changes and refetch
+watch(
+  () => props.timeRange,
+  (newTimeRange) => {
+    resetPagination();
+    fetchTopArtists({ time_range: newTimeRange, limit: 50 });
+  },
+  { immediate: true }
+);
 </script>
