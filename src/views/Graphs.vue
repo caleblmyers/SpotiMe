@@ -19,14 +19,10 @@
         <TimeRangeSelector v-model="timeRange" />
       </div>
 
-      <!-- Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Charts Grid - 3 columns on large screens, responsive -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <GenresChart :time-range="timeRange" />
         <ArtistsChart :time-range="timeRange" />
-      </div>
-
-      <!-- Radar Chart Row -->
-      <div class="grid grid-cols-1 gap-6">
         <GenresRadarChart />
       </div>
     </div>
@@ -55,4 +51,3 @@ const { profile } = useProfile();
 // Time range state
 const timeRange = ref<TimeRange>('short_term');
 </script>
-

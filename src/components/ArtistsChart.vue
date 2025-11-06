@@ -1,17 +1,20 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-xl font-bold mb-4">Artists by Top Tracks</h2>
-    <div v-if="isLoading" class="flex justify-center items-center py-12">
-      <p class="text-gray-500">Loading chart data...</p>
+  <div class="bg-white rounded-lg shadow-md p-4 h-full flex flex-col">
+    <div class="mb-3">
+      <h2 class="text-lg font-bold text-gray-900">Artists by Top Tracks</h2>
+      <p v-if="summary" class="text-xs text-gray-500 mt-1">{{ summary }}</p>
     </div>
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-800">{{ error }}</p>
+    <div v-if="isLoading" class="flex justify-center items-center py-8 flex-1">
+      <p class="text-gray-500 text-sm">Loading...</p>
     </div>
-    <div v-else-if="chartData && chartData.labels.length > 0" class="flex justify-center">
-      <PolarArea :data="chartData" :options="chartOptions" class="max-w-full" />
+    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-3">
+      <p class="text-red-800 text-sm">{{ error }}</p>
     </div>
-    <div v-else class="text-center py-12">
-      <p class="text-gray-500">No artist data available</p>
+    <div v-else-if="chartData && chartData.labels.length > 0" class="flex-1 flex items-center justify-center min-h-0">
+      <PolarArea :data="chartData" :options="chartOptions" class="max-w-full max-h-full" />
+    </div>
+    <div v-else class="text-center py-8 flex-1 flex items-center justify-center">
+      <p class="text-gray-500 text-sm">No artist data available</p>
     </div>
   </div>
 </template>
@@ -121,25 +124,37 @@ function generateColors(count: number): {
   };
 }
 
+const summary = computed(() => {
+  if (!tracks.value || tracks.value.length === 0) return null;
+  const totalArtists = chartData.value?.labels.length || 0;
+  const totalTracks = tracks.value.length;
+  return `${totalArtists} unique artists across ${totalTracks} tracks`;
+});
+
 const chartOptions = {
   responsive: true,
-  maintainAspectRatio: true,
+  maintainAspectRatio: false,
+  aspectRatio: 1,
   plugins: {
     legend: {
       display: true,
       position: 'bottom' as const,
       labels: {
-        padding: 15,
+        padding: 8,
         usePointStyle: true,
         font: {
-          size: 11,
+          size: 9,
         },
+        boxWidth: 8,
       },
     },
     tooltip: {
       callbacks: {
         label: (context: { label: string; parsed: { r: number } }) => {
-          return `${context.label}: ${context.parsed.r} track${context.parsed.r !== 1 ? 's' : ''}`;
+          const percentage = chartData.value 
+            ? Math.round((context.parsed.r / tracks.value!.length) * 100)
+            : 0;
+          return `${context.label}: ${context.parsed.r} track${context.parsed.r !== 1 ? 's' : ''} (${percentage}%)`;
         },
       },
     },
@@ -149,6 +164,9 @@ const chartOptions = {
       beginAtZero: true,
       ticks: {
         stepSize: 1,
+        font: {
+          size: 9,
+        },
       },
     },
   },

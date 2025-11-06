@@ -1,21 +1,24 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-xl font-bold mb-4">Genre Evolution Over Time</h2>
-    <div v-if="isLoading" class="flex justify-center items-center py-12">
-      <p class="text-gray-500">Loading chart data...</p>
+  <div class="bg-white rounded-lg shadow-md p-4 h-full flex flex-col">
+    <div class="mb-3">
+      <h2 class="text-lg font-bold text-gray-900">Genre Evolution Over Time</h2>
+      <p v-if="summary" class="text-xs text-gray-500 mt-1">{{ summary }}</p>
     </div>
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-800">{{ error }}</p>
-      <button v-if="onRetry" @click="onRetry"
-        class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+    <div v-if="isLoading" class="flex justify-center items-center py-8 flex-1">
+      <p class="text-gray-500 text-sm">Loading...</p>
+    </div>
+    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-3">
+      <p class="text-red-800 text-sm">{{ error }}</p>
+      <button @click="onRetry"
+        class="mt-2 px-3 py-1.5 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs">
         Retry
       </button>
     </div>
-    <div v-else-if="chartData && chartData.labels.length > 0" class="flex justify-center">
-      <Radar :data="chartData" :options="chartOptions" class="max-w-full" />
+    <div v-else-if="chartData && chartData.labels.length > 0" class="flex-1 flex items-center justify-center min-h-0">
+      <Radar :data="chartData" :options="chartOptions" class="max-w-full max-h-full" />
     </div>
-    <div v-else class="text-center py-12">
-      <p class="text-gray-500">No genre data available</p>
+    <div v-else class="text-center py-8 flex-1 flex items-center justify-center">
+      <p class="text-gray-500 text-sm">No genre data available</p>
     </div>
   </div>
 </template>
@@ -161,19 +164,27 @@ function onRetry(): void {
 
 // Data will be fetched automatically by composables with time_range in defaultParams
 
+const summary = computed(() => {
+  if (!chartData.value) return null;
+  const genreCount = chartData.value.labels.length;
+  return `Top ${genreCount} genres across all time periods`;
+});
+
 const chartOptions = {
   responsive: true,
-  maintainAspectRatio: true,
+  maintainAspectRatio: false,
+  aspectRatio: 1,
   plugins: {
     legend: {
       display: true,
       position: 'bottom' as const,
       labels: {
-        padding: 15,
+        padding: 8,
         usePointStyle: true,
         font: {
-          size: 11,
+          size: 9,
         },
+        boxWidth: 8,
       },
     },
     tooltip: {
@@ -191,6 +202,9 @@ const chartOptions = {
       beginAtZero: true,
       ticks: {
         stepSize: 1,
+        font: {
+          size: 9,
+        },
       },
       grid: {
         color: 'rgba(0, 0, 0, 0.1)',

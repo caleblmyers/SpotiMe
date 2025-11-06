@@ -32,7 +32,7 @@
                 {{ track.name }}
               </h3>
             </div>
-            <div class="text-xs text-gray-600 truncate" :title="track.album?.name">
+            <div class="text-xs text-gray-600 truncate flex-1 min-w-0" :title="track.album?.name">
               {{ track.album?.name || 'Unknown Album' }}
             </div>
             <div class="text-xs text-gray-500 mt-1">
@@ -65,8 +65,10 @@
                 </div>
               </div>
             </td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 truncate" :title="track.album?.name">
-              {{ track.album?.name || 'Unknown Album' }}
+            <td class="px-4 py-3 text-sm text-gray-600">
+              <div class="truncate max-w-xs" :title="track.album?.name">
+                {{ track.album?.name || 'Unknown Album' }}
+              </div>
             </td>
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
               {{ formatDuration(track.duration_ms) }}

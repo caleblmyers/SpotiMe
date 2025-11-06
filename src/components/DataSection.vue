@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-full min-w-0 bg-white rounded-lg shadow-md p-2">
+  <div :class="['w-full max-w-full min-w-0 bg-white rounded-lg shadow-md p-2', customClass]">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-xl font-bold">{{ title }}</h2>
       <slot name="header-actions" />
@@ -30,6 +30,8 @@
 </template>
 
 <script lang="ts" setup>
+import { useAttrs } from 'vue';
+
 interface Props {
   title: string;
   isLoading: boolean;
@@ -40,9 +42,12 @@ interface Props {
   onRetry?: () => void;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   loadingMessage: 'Loading...',
   emptyMessage: 'No data found',
   showEmpty: false,
 });
+
+const attrs = useAttrs();
+const customClass = attrs.class || '';
 </script>

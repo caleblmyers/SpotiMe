@@ -1,53 +1,54 @@
 <template>
   <DataSection title="Top Artists" :is-loading="isLoading" :error="error" loading-message="Loading artists..."
-    empty-message="No artists found" :show-empty="!artists || artists.length === 0" :on-retry="() => fetchTopArtists()">
-
-    <!-- Top Artist (Rank 1) -->
-    <div v-if="displayedTopArtist" class="mb-6 w-full max-w-full min-w-0">
-      <div class="bg-gray-50 rounded-lg shadow-sm overflow-hidden p-4">
-        <ExpandedDetailView :title="displayedTopArtist.name" :image-url="displayedTopArtist.images?.[0]?.url"
-          image-placeholder="No Image" :fields="topArtistFields" :genres="displayedTopArtist.genres"
-          :spotify-url="displayedTopArtist.external_urls?.spotify" :show-rank-badge="true"
-          :rank-badge-value="getOriginalRank(displayedTopArtist.id)" />
+    empty-message="No artists found" :show-empty="!artists || artists.length === 0" :on-retry="() => fetchTopArtists()"
+    >
+    <div class="flex flex-col flex-1 min-h-0">
+      <!-- Top Artist (Rank 1) -->
+      <div v-if="displayedTopArtist" class="mb-6 w-full max-w-full min-w-0 shrink-0">
+        <div class="bg-gray-50 rounded-lg shadow-sm overflow-hidden p-4">
+          <ExpandedDetailView :title="displayedTopArtist.name" :image-url="displayedTopArtist.images?.[0]?.url"
+            image-placeholder="No Image" :fields="topArtistFields" :genres="displayedTopArtist.genres"
+            :spotify-url="displayedTopArtist.external_urls?.spotify" :show-rank-badge="true"
+            :rank-badge-value="getOriginalRank(displayedTopArtist.id)" />
+        </div>
       </div>
-    </div>
 
-    <!-- Artists 2-5 in a Row -->
-    <div v-if="rowArtists.length > 0" class="mb-6">
-      <div class="grid grid-cols-4 gap-4 w-full">
-        <div v-for="artist in rowArtists" :key="artist.id" @click="selectArtistFromRow(artist)"
-          class="bg-gray-50 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all cursor-pointer hover:scale-105 w-full min-w-0">
-          <!-- Artist Image -->
-          <div class="aspect-square bg-gray-200 overflow-hidden">
-            <img v-if="artist.images && artist.images[0]" :src="artist.images[0].url" :alt="artist.name"
-              class="w-full h-full object-cover" />
-            <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-              No Image
+      <!-- Artists 2-5 in a Row -->
+      <div v-if="rowArtists.length > 0" class="mb-6 shrink-0">
+        <div class="grid grid-cols-4 gap-4 w-full">
+          <div v-for="artist in rowArtists" :key="artist.id" @click="selectArtistFromRow(artist)"
+            class="bg-gray-50 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all cursor-pointer hover:scale-105 w-full min-w-0">
+            <!-- Artist Image -->
+            <div class="aspect-square bg-gray-200 overflow-hidden">
+              <img v-if="artist.images && artist.images[0]" :src="artist.images[0].url" :alt="artist.name"
+                class="w-full h-full object-cover" />
+              <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                No Image
+              </div>
             </div>
-          </div>
 
-          <!-- Artist Info -->
-          <div class="p-3">
-            <div class="flex items-center gap-2 mb-1">
-              <RankBadge :rank="getOriginalRank(artist.id)" size="small" />
-              <h3 class="font-semibold text-sm truncate flex-1" :title="artist.name">
-                {{ artist.name }}
-              </h3>
-            </div>
-            <div v-if="artist.genres && artist.genres.length > 0" class="flex flex-wrap gap-1">
-              <span v-for="genre in artist.genres.slice(0, 2)" :key="genre"
-                class="px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
-                {{ genre }}
-              </span>
+            <!-- Artist Info -->
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <RankBadge :rank="getOriginalRank(artist.id)" size="small" />
+                <h3 class="font-semibold text-sm truncate flex-1" :title="artist.name">
+                  {{ artist.name }}
+                </h3>
+              </div>
+              <div v-if="artist.genres && artist.genres.length > 0" class="flex flex-wrap gap-1">
+                <span v-for="genre in artist.genres.slice(0, 2)" :key="genre"
+                  class="px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+                  {{ genre }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Remaining Artists Table (Scrollable) -->
-    <div v-if="remainingArtists.length > 0" class="mt-6">
-      <ScrollableTable :columns="tableColumns">
+      <!-- Remaining Artists Table (Scrollable) -->
+      <div v-if="remainingArtists.length > 0" class="mt-6 flex-1 flex flex-col min-h-0">
+        <ScrollableTable :columns="tableColumns" :max-height="'906px'">
         <template v-for="artist in remainingArtists" :key="artist.id">
           <tr @click="toggleExpandedArtist(artist.id)" class="hover:bg-gray-50 cursor-pointer transition-colors">
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -92,6 +93,7 @@
           </tr>
         </template>
       </ScrollableTable>
+      </div>
     </div>
   </DataSection>
 </template>
