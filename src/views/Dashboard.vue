@@ -5,19 +5,21 @@
 
     <!-- Authenticated State -->
     <div v-else class="space-y-4">
-      <!-- User Info and Time Range Selector Row -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <!-- User Info -->
-        <UserProfile :profile="profile" :display-name="displayName" />
-
-        <!-- Time Range Selector -->
-        <TimeRangeSelector v-model="timeRange" />
-      </div>
-
       <!-- Main Content Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <!-- Left Column (40%) - Top Tracks -->
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-2 space-y-4">
+          <!-- User Info and Time Range Selector Row -->
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <!-- User Info -->
+            <UserProfile :profile="profile" :display-name="displayName" />
+
+            <!-- Time Range Selector -->
+            <div class="ml-auto">
+              <TimeRangeSelector v-model="timeRange" />
+            </div>
+          </div>
+
           <TopTracks :time-range="timeRange" />
         </div>
 
