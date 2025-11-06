@@ -116,7 +116,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const TOP_ARTISTS_COUNT = 5;
-const { artists, isLoading, error, fetchTopArtists } = useTopArtists({ limit: 50 });
+const timeRangeRef = computed(() => props.timeRange);
+const { artists, isLoading, error, fetchTopArtists } = useTopArtists({ limit: 50 }, timeRangeRef);
 
 // State for managing top artist selection
 const topArtistIndex = ref(0);
@@ -209,25 +210,15 @@ function toggleExpandedArtist(artistId: string): void {
   }
 }
 
-// Watch for time range changes and refetch
+// Reset top artist when artists data changes or time range changes
 watch(
-  () => props.timeRange,
-  (newTimeRange) => {
+  () => [artists.value, props.timeRange] as const,
+  () => {
     topArtistIndex.value = 0;
     expandedArtistId.value = null;
-    fetchTopArtists({ time_range: newTimeRange, limit: 50 });
-  },
-  { immediate: true }
-);
-
-// Reset top artist when artists data changes
-watch(
-  () => artists.value,
-  () => {
     if (topArtistIndex.value >= (top5Artists.value.length || 0)) {
       topArtistIndex.value = 0;
     }
-    expandedArtistId.value = null;
   }
 );
 </script>

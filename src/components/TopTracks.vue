@@ -106,7 +106,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const TOP_TRACKS_COUNT = 5;
-const { tracks, isLoading, error, fetchTopTracks } = useTopTracks({ limit: 50 });
+const timeRangeRef = computed(() => props.timeRange);
+const { tracks, isLoading, error, fetchTopTracks } = useTopTracks({ limit: 50 }, timeRangeRef);
 
 // State for managing top track selection
 const topTrackIndex = ref(0);
@@ -201,25 +202,15 @@ function toggleExpandedTrack(trackId: string): void {
   }
 }
 
-// Watch for time range changes and refetch
+// Reset top track when tracks data changes or time range changes
 watch(
-  () => props.timeRange,
-  (newTimeRange) => {
+  () => [tracks.value, props.timeRange] as const,
+  () => {
     topTrackIndex.value = 0;
     expandedTrackId.value = null;
-    fetchTopTracks({ time_range: newTimeRange, limit: 50 });
-  },
-  { immediate: true }
-);
-
-// Reset top track when tracks data changes
-watch(
-  () => tracks.value,
-  () => {
     if (topTrackIndex.value >= (top5Tracks.value.length || 0)) {
       topTrackIndex.value = 0;
     }
-    expandedTrackId.value = null;
   }
 );
 </script>

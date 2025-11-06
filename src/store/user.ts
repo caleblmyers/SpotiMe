@@ -67,15 +67,12 @@ export const useUserStore = defineStore("user", {
     },
     async fetchSpotifyProfile(): Promise<void> {
       try {
-        // Use the same authenticated request function as the composable
-        // Don't use cache for store to ensure fresh data
-        const profile = await makeAuthenticatedRequest<SpotifyUser>(
-          "/api/me",
-          undefined,
-          false
-        );
+        // Use profile store to fetch and cache profile data
+        const { useProfileStore } = await import('./profile');
+        const profileStore = useProfileStore();
+        await profileStore.fetchProfile(true); // Force fetch for auth flows
 
-        // Ensure the response has the required data
+        const profile = profileStore.profile;
         if (!profile || !profile.id) {
           throw new Error("Invalid profile response: missing id");
         }
@@ -99,6 +96,12 @@ export const useUserStore = defineStore("user", {
       this.images = null;
       localStorage.removeItem("spotify_access_token");
       localStorage.removeItem("spotify_refresh_token");
+      
+      // Clear profile store as well
+      import('./profile').then(({ useProfileStore }) => {
+        const profileStore = useProfileStore();
+        profileStore.clearProfile();
+      });
     },
   },
 });

@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { PolarArea } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -39,16 +39,8 @@ const props = withDefaults(defineProps<Props>(), {
   timeRange: 'medium_term',
 });
 
-const { tracks, isLoading, error, fetchTopTracks } = useTopTracks({ limit: 50 });
-
-// Watch for time range changes and refetch
-watch(
-  () => props.timeRange,
-  (newTimeRange) => {
-    fetchTopTracks({ time_range: newTimeRange, limit: 50 });
-  },
-  { immediate: true }
-);
+const timeRangeRef = computed(() => props.timeRange);
+const { tracks, isLoading, error } = useTopTracks({ limit: 50 }, timeRangeRef);
 
 // Process artists from tracks
 const chartData = computed(() => {

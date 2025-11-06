@@ -1,28 +1,22 @@
-import { computed, onMounted } from 'vue';
-import { useApi } from './useApi';
-import type { SpotifyGenresResponse } from '../types/spotify';
+import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
+import { useGenresStore } from '../store/genres';
 
 export function useGenres() {
-  const { data, isLoading, error, fetchData } = useApi<SpotifyGenresResponse>(
-    '/api/genres'
-  );
+  const genresStore = useGenresStore();
+  const { genres, genresResponse, isLoading, error } = storeToRefs(genresStore);
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount if not cached
   onMounted(() => {
-    if (!data.value) {
-      fetchData();
-    }
+    genresStore.fetchGenres();
   });
-
-  // Computed property to extract genres array from response
-  const genres = computed<string[]>(() => data.value?.genres ?? []);
 
   return {
     genres,
-    genresResponse: data,
+    genresResponse,
     isLoading,
     error,
-    fetchGenres: fetchData,
+    fetchGenres: (force = false) => genresStore.fetchGenres(force),
   };
 }
 

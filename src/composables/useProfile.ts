@@ -1,22 +1,21 @@
+import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
-import { useApi } from './useApi';
-import type { SpotifyUser } from '../types/spotify';
+import { useProfileStore } from '../store/profile';
 
 export function useProfile() {
-  const { data, isLoading, error, fetchData } = useApi<SpotifyUser>('/api/me');
+  const profileStore = useProfileStore();
+  const { profile, isLoading, error } = storeToRefs(profileStore);
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount if not cached
   onMounted(() => {
-    if (!data.value) {
-      fetchData();
-    }
+    profileStore.fetchProfile();
   });
 
   return {
-    profile: data,
+    profile,
     isLoading,
     error,
-    fetchProfile: fetchData,
+    fetchProfile: (force = false) => profileStore.fetchProfile(force),
   };
 }
 

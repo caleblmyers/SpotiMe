@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { Radar } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -159,18 +159,7 @@ function onRetry(): void {
   longTerm.fetchTopArtists({ time_range: 'long_term', limit: 50 });
 }
 
-// Fetch data on mount
-onMounted(() => {
-  if (!shortTerm.artists.value) {
-    shortTerm.fetchTopArtists({ time_range: 'short_term', limit: 50 });
-  }
-  if (!mediumTerm.artists.value) {
-    mediumTerm.fetchTopArtists({ time_range: 'medium_term', limit: 50 });
-  }
-  if (!longTerm.artists.value) {
-    longTerm.fetchTopArtists({ time_range: 'long_term', limit: 50 });
-  }
-});
+// Data will be fetched automatically by composables with time_range in defaultParams
 
 const chartOptions = {
   responsive: true,
