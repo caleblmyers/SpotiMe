@@ -84,6 +84,7 @@ export async function loginSpotify(): Promise<void> {
   const res = await axios.get(`${API_BASE_URL}/auth/login-spotify`, {
     withCredentials: true,
   });
+  return console.log(res.data);
   window.location.href = res.data.url;
 }
 
