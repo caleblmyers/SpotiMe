@@ -2,6 +2,8 @@
 
 A modern web application for visualizing your Spotify listening statistics. Discover your top artists, tracks, and genre preferences with interactive charts and detailed analytics.
 
+🌐 **Live App**: [https://spoti-me.vercel.app/](https://spoti-me.vercel.app/)
+
 ## 📖 Description
 
 SpotiMe connects to your Spotify account to provide comprehensive insights into your music listening habits. The app displays your top artists and tracks across different time periods (last 4 weeks, last 6 months, and all time), along with interactive visualizations of your genre preferences and listening patterns.
@@ -11,12 +13,17 @@ SpotiMe connects to your Spotify account to provide comprehensive insights into 
 - **Top Artists & Tracks**: View your most-played artists and tracks with expandable detail views
 - **Time Range Analysis**: Switch between short-term (4 weeks), medium-term (6 months), and long-term (all time) statistics
 - **Interactive Charts**: 
-  - Genre distribution charts (Polar Area)
-  - Artist frequency charts
+  - Genre distribution charts (Polar Area) with expandable genre breakdowns
+  - Artist frequency charts with expandable track breakdowns
   - Genre evolution radar chart comparing all time ranges
+  - Recently played vs top tracks comparison
+  - Playlist comparison showing top tracks/artists representation in your playlists
+- **Recently Played**: View your recently played tracks with timestamps
+- **Playlist Analytics**: Compare your top tracks and artists with their presence in your playlists
 - **User Profile**: Display your Spotify profile information
 - **Responsive Design**: Fully responsive layout that works on desktop and mobile devices
 - **Real-time Data**: Fetches fresh data from Spotify API with intelligent caching
+- **Smart Loading States**: Prevents flash of unauthenticated UI during authentication restoration
 
 ## 🛠️ Tech Stack
 
@@ -93,7 +100,45 @@ This application requires a backend API server that handles Spotify OAuth authen
   - `/api/top-artists` - Get top artists
   - `/api/top-tracks` - Get top tracks
   - `/api/genres` - Get available genres
+  - `/api/recently-played` - Get recently played tracks
+  - `/api/playlists` - Get user playlists
+  - `/api/playlists/:id/tracks` - Get tracks from a playlist
+  - `/api/playlists/search` - Search and analyze playlists
+  - `/auth/login-spotify` - Initiate Spotify OAuth
   - `/auth/refresh` - Refresh access token
+  - `/auth/callback` - Handle OAuth callback
+
+### ⚠️ Spotify App Whitelisting
+
+**Important**: Spotify development apps require email whitelisting for authentication.
+
+#### For Production/Deployed Apps
+
+If you're using a deployed version of this application, your Spotify account email must be whitelisted by the application administrator. If you try to authenticate and receive an error, you'll see a helpful error page explaining:
+
+- Your account is not whitelisted
+- How to request access
+- Alternative: Running the app locally with your own Spotify app
+
+#### For Local Development
+
+To avoid whitelisting restrictions, you can run the application locally with your own Spotify Developer App:
+
+1. **Create a Spotify App**:
+   - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+   - Click "Create App"
+   - Fill in app details and accept the terms
+   - Note your `Client ID` and `Client Secret`
+
+2. **Configure Your Backend**:
+   - Update your backend to use your Spotify app credentials
+   - Set the redirect URI to match your local development URL (e.g., `http://localhost:5173/auth/callback`)
+
+3. **Update Environment Variables**:
+   - Configure your backend with your Spotify app's Client ID and Client Secret
+   - Ensure redirect URIs match in both your backend and Spotify app settings
+
+This way, you can use the application without needing to be whitelisted, as you'll be using your own Spotify app credentials.
 
 ### First Run
 
@@ -131,47 +176,9 @@ This application requires a backend API server that handles Spotify OAuth authen
 
 > **Note**: To add screenshots to the gallery, place image files in the `docs/images/` directory and update the paths above. Recommended image format: PNG or JPG, optimized for web.
 
-## 📁 Project Structure
-
-```
-spotime/
-├── src/
-│   ├── api/              # API client utilities
-│   ├── components/       # Vue components
-│   ├── composables/      # Reusable composition functions
-│   ├── constants/        # App constants
-│   ├── router/           # Vue Router configuration
-│   ├── store/            # Pinia stores
-│   ├── types/            # TypeScript type definitions
-│   ├── utils/            # Utility functions
-│   └── views/            # Page components
-├── public/               # Static assets
-├── docs/                 # Documentation and images
-└── package.json          # Dependencies and scripts
-```
-
-## 🔧 Development
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-
-### Code Style
-
-- TypeScript strict mode enabled
-- Vue 3 Composition API with `<script setup>`
-- Tailwind CSS for styling
-- ESLint for code quality (if configured)
-
 ## 📝 License
 
 [Add your license information here]
-
-## 🤝 Contributing
-
-[Add contribution guidelines here]
 
 ## 📧 Contact
 
