@@ -10,36 +10,33 @@
 
     <!-- Authenticated State -->
     <div v-else class="space-y-4">
-      <!-- User Info and Time Range Selector Row -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <!-- User Info -->
+      <!-- User Info -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <UserProfile :profile="profile" :display-name="displayName" />
-
-        <!-- Time Range Selector -->
-        <TimeRangeSelector v-model="timeRange" />
       </div>
 
-      <!-- Charts Grid - 3 columns on large screens, responsive -->
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <GenresChart :time-range="timeRange" />
-        <ArtistsChart :time-range="timeRange" />
-        <GenresRadarChart />
+      <!-- Charts Grid - 2 columns on large screens, responsive -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <GenresChart />
+        <ArtistsChart />
+        <GenresRadarChart class="lg:col-span-2" />
+        <RecentlyPlayedComparison class="lg:col-span-2" />
+        <PlaylistComparison class="lg:col-span-2" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from "../store/user";
 import { useProfile } from "../composables/useProfile";
-import type { TimeRange } from "../types/spotify";
 import UserProfile from "../components/UserProfile.vue";
 import GenresChart from "../components/GenresChart.vue";
 import ArtistsChart from "../components/ArtistsChart.vue";
 import GenresRadarChart from "../components/GenresRadarChart.vue";
-import TimeRangeSelector from "../components/TimeRangeSelector.vue";
+import RecentlyPlayedComparison from "../components/RecentlyPlayedComparison.vue";
+import PlaylistComparison from "../components/PlaylistComparison.vue";
 
 const userStore = useUserStore();
 const user = storeToRefs(userStore);
@@ -47,7 +44,4 @@ const { displayName, isAuthenticated } = user;
 
 // Get full profile data with followers
 const { profile } = useProfile();
-
-// Time range state
-const timeRange = ref<TimeRange>('short_term');
 </script>

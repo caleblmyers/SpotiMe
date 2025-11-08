@@ -22,15 +22,21 @@ export function useRecentlyPlayed(defaultParams?: RecentlyPlayedParams) {
   // Fetch on mount
   fetchData(defaultParams as Record<string, unknown> | undefined);
 
-  // Extract tracks from response
+  // Extract tracks with played_at timestamps from response
   const tracks = computed(() => {
     if (!data.value) return [];
     // Handle both response formats: { items: [...] } or direct array
     if (Array.isArray(data.value)) {
-      return data.value.map((item: any) => item.track || item);
+      return data.value.map((item: any) => ({
+        track: item.track || item,
+        played_at: item.played_at || null,
+      }));
     }
     if (data.value.items && Array.isArray(data.value.items)) {
-      return data.value.items.map((item: any) => item.track || item);
+      return data.value.items.map((item: any) => ({
+        track: item.track || item,
+        played_at: item.played_at || null,
+      }));
     }
     return [];
   });

@@ -31,7 +31,7 @@
 
       <!-- Recently Played Row -->
       <div class="mt-6">
-        <RecentlyPlayed />
+        <RecentlyPlayedList />
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@ import type { TimeRange } from "../types/spotify";
 import Welcome from "../components/Welcome.vue";
 import TopArtists from "../components/TopArtists.vue";
 import TopTracks from "../components/TopTracks.vue";
-import RecentlyPlayed from "../components/RecentlyPlayed.vue";
+import RecentlyPlayedList from "../components/RecentlyPlayedList.vue";
 import UserProfile from "../components/UserProfile.vue";
 import TimeRangeSelector from "../components/TimeRangeSelector.vue";
 

@@ -187,3 +187,50 @@ export interface SpotifyAlbum {
   popularity: number;
 }
 
+export interface SpotifyPlaylist {
+  id: string;
+  name: string;
+  description: string | null;
+  external_urls: {
+    spotify: string;
+  };
+  images: Array<{
+    url: string;
+    height: number | null;
+    width: number | null;
+  }>;
+  owner: {
+    id: string;
+    display_name: string;
+  };
+  public: boolean;
+  tracks: {
+    total: number;
+  };
+}
+
+export interface SpotifyPlaylistTrack {
+  added_at: string;
+  added_by: {
+    id: string;
+    name: string | null;
+  };
+  track: SpotifyTrack;
+}
+
+export interface PlaylistSearchResult {
+  playlist: SpotifyPlaylist;
+  top_tracks_count: number;
+  top_artists_count: number;
+  top_tracks_percentage: number;
+  top_artists_percentage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+

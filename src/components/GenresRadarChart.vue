@@ -14,8 +14,61 @@
         Retry
       </button>
     </div>
-    <div v-else-if="chartData && chartData.labels.length > 0" class="flex-1 flex items-center justify-center min-h-0">
-      <Radar :data="chartData" :options="chartOptions" class="max-w-full max-h-full" />
+    <div v-else-if="chartData && chartData.labels.length > 0" class="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
+      <!-- Chart on the left -->
+      <div class="flex-1 flex items-center justify-center min-h-0 lg:min-w-0">
+        <Radar :data="chartData" :options="chartOptions" class="max-w-full max-h-full" />
+      </div>
+      <!-- Detailed breakdown on the right -->
+      <div class="lg:w-80 shrink-0 flex flex-col min-h-0">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3 shrink-0">Genre Breakdown by Time Period</h3>
+        <div class="overflow-y-auto space-y-4 max-h-[600px] min-h-0">
+          <div
+            v-for="(timeRange, datasetIndex) in chartData.datasets"
+            :key="timeRange.label"
+            class="space-y-2">
+            <div class="flex items-center gap-2 mb-2">
+              <div
+                class="w-3 h-3 rounded-full"
+                :style="{ backgroundColor: timeRange.borderColor }"></div>
+              <span class="text-sm font-semibold text-gray-900">{{ timeRange.label }}</span>
+            </div>
+            <div class="space-y-1 pl-5">
+              <div
+                v-for="genre in topGenresByTimeRange[datasetIndex]"
+                :key="`${timeRange.label}-${genre.name}`"
+                class="bg-gray-50 rounded transition-colors">
+                <div
+                  @click="toggleGenre(datasetIndex, genre.name)"
+                  class="flex items-center justify-between text-xs p-1.5 hover:bg-gray-100 cursor-pointer rounded">
+                  <span class="text-gray-700 truncate flex-1">{{ genre.name }}</span>
+                  <div class="flex items-center gap-2 ml-2">
+                    <span class="text-gray-600">{{ genre.count }}</span>
+                    <svg
+                      class="w-3 h-3 text-gray-500 transition-transform shrink-0"
+                      :class="{ 'rotate-90': expandedGenre === `${datasetIndex}-${genre.name}` }"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  v-if="expandedGenre === `${datasetIndex}-${genre.name}`"
+                  class="px-2 pb-2 pt-1 space-y-1 border-t border-gray-200 mt-1">
+                  <div
+                    v-for="artist in getArtistsForGenre(datasetIndex, genre.name)"
+                    :key="artist.id"
+                    class="px-2 py-1 text-xs text-gray-700">
+                    <span class="truncate">{{ artist.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div v-else class="text-center py-8 flex-1 flex items-center justify-center">
       <p class="text-gray-500 text-sm">No genre data available</p>
@@ -24,7 +77,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Radar } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -59,6 +112,40 @@ const isLoading = computed(() =>
 const error = computed(() =>
   shortTerm.error.value || mediumTerm.error.value || longTerm.error.value || null
 );
+
+// Track which genre is expanded (format: "datasetIndex-genreName")
+const expandedGenre = ref<string | null>(null);
+
+function toggleGenre(datasetIndex: number, genreName: string): void {
+  const key = `${datasetIndex}-${genreName}`;
+  if (expandedGenre.value === key) {
+    expandedGenre.value = null;
+  } else {
+    expandedGenre.value = key;
+  }
+}
+
+function getArtistsForGenre(datasetIndex: number, genreName: string): SpotifyArtist[] {
+  // Get artists from the specific time range based on datasetIndex
+  let artists: SpotifyArtist[] | null = null;
+  
+  if (datasetIndex === 0) {
+    artists = shortTerm.artists.value;
+  } else if (datasetIndex === 1) {
+    artists = mediumTerm.artists.value;
+  } else if (datasetIndex === 2) {
+    artists = longTerm.artists.value;
+  }
+  
+  if (!artists || artists.length === 0) {
+    return [];
+  }
+  
+  // Filter by genre and sort by popularity
+  return artists
+    .filter(artist => artist.genres && artist.genres.includes(genreName))
+    .sort((a, b) => b.popularity - a.popularity);
+}
 
 function processGenres(artists: SpotifyArtist[] | null): Record<string, number> {
   if (!artists || artists.length === 0) {
@@ -168,6 +255,25 @@ const summary = computed(() => {
   if (!chartData.value) return null;
   const genreCount = chartData.value.labels.length;
   return `Top ${genreCount} genres across all time periods`;
+});
+
+// Top genres by time range for detailed breakdown
+const topGenresByTimeRange = computed(() => {
+  if (!chartData.value) return [[], [], []];
+  
+  const datasets = chartData.value.datasets;
+  const labels = chartData.value.labels;
+  
+  return datasets.map((dataset) => {
+    return labels
+      .map((genre, genreIndex) => ({
+        name: genre,
+        count: dataset.data[genreIndex] ?? 0,
+      }))
+      .filter(item => (item.count ?? 0) > 0)
+      .sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
+      .slice(0, 5); // Top 5 per time range
+  });
 });
 
 const chartOptions = {
