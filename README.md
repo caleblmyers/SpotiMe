@@ -1,47 +1,23 @@
 # SpotiMe 🎵
 
-A modern web application for visualizing your Spotify listening statistics. Discover your top artists, tracks, and genre preferences with interactive charts and detailed analytics.
+Visualize your Spotify listening statistics. Discover your top artists, tracks, and genre preferences with interactive charts and detailed analytics.
 
-🌐 **Live App**: [https://spoti-me.vercel.app/](https://spoti-me.vercel.app/)
+[https://spoti-me.vercel.app/](https://spoti-me.vercel.app/)
 
 ## 📖 Description
 
 SpotiMe connects to your Spotify account to provide comprehensive insights into your music listening habits. The app displays your top artists and tracks across different time periods (last 4 weeks, last 6 months, and all time), along with interactive visualizations of your genre preferences and listening patterns.
 
-### Key Features
-
-- **Top Artists & Tracks**: View your most-played artists and tracks with expandable detail views
-- **Time Range Analysis**: Switch between short-term (4 weeks), medium-term (6 months), and long-term (all time) statistics
-- **Interactive Charts**: 
-  - Genre distribution charts (Polar Area) with expandable genre breakdowns
-  - Artist frequency charts with expandable track breakdowns
-  - Genre evolution radar chart comparing all time ranges
-  - Recently played vs top tracks comparison
-  - Playlist comparison showing top tracks/artists representation in your playlists
-- **Recently Played**: View your recently played tracks with timestamps
-- **Playlist Analytics**: Compare your top tracks and artists with their presence in your playlists
-- **User Profile**: Display your Spotify profile information
-- **Responsive Design**: Fully responsive layout that works on desktop and mobile devices
-- **Real-time Data**: Fetches fresh data from Spotify API with intelligent caching
-- **Smart Loading States**: Prevents flash of unauthenticated UI during authentication restoration
-
 ## 🛠️ Tech Stack
 
-### Frontend
-- **Vue 3** - Progressive JavaScript framework with Composition API
-- **TypeScript** - Type-safe JavaScript for better development experience
-- **Vite** - Fast build tool and development server
-- **Pinia** - State management for Vue applications
-- **Vue Router** - Client-side routing
-- **Tailwind CSS** - Utility-first CSS framework
-- **Chart.js / vue-chartjs** - Beautiful, responsive charts
-- **Axios** - HTTP client for API requests
-
-### Architecture
-- **Composables** - Reusable composition functions for data fetching and logic
-- **Pinia Stores** - Centralized state management with caching for profile and genres
-- **Component-based** - Modular, reusable Vue components
-- **Type-safe** - Full TypeScript support throughout the application
+- Vue 3
+- TypeScript
+- Vite
+- Pinia
+- Vue Router
+- Tailwind CSS
+- Chart.js / vue-chartjs
+- Axios
 
 ## 🚀 Setup Instructions
 
@@ -56,7 +32,7 @@ SpotiMe connects to your Spotify account to provide comprehensive insights into 
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/caleblmyers/SpotiMe.git
    cd spotime
    ```
 
@@ -79,19 +55,13 @@ SpotiMe connects to your Spotify account to provide comprehensive insights into 
    npm run dev
    ```
 
-5. **Build for production**
-   ```bash
-   npm run build
-   ```
-
-6. **Preview production build**
-   ```bash
-   npm run preview
-   ```
-
 ### Backend Setup
 
-This application requires a backend API server that handles Spotify OAuth authentication and API requests. Ensure your backend is:
+This application requires a backend API server that handles Spotify OAuth authentication and API requests. The backend API is available in a separate repository:
+
+**Backend Repository**: [SpotiMe-API](https://github.com/caleblmyers/SpotiMe-API)
+
+For local development, clone and set up the backend API following the instructions in the [SpotiMe-API repository](https://github.com/caleblmyers/SpotiMe-API). Ensure your backend is:
 
 - Running on `http://127.0.0.1:4000` (or update `VITE_API_BASE_URL`)
 - Configured with Spotify OAuth credentials
@@ -112,9 +82,9 @@ This application requires a backend API server that handles Spotify OAuth authen
 
 **Important**: Spotify development apps require email whitelisting for authentication.
 
-#### For Production/Deployed Apps
+#### For Live Application
 
-If you're using a deployed version of this application, your Spotify account email must be whitelisted by the application administrator. If you try to authenticate and receive an error, you'll see a helpful error page explaining:
+If you're using the deployed version of this application, your Spotify account email must be whitelisted by the application administrator. If you try to authenticate and receive an error, you'll see a helpful error page explaining:
 
 - Your account is not whitelisted
 - How to request access
@@ -178,11 +148,20 @@ This way, you can use the application without needing to be whitelisted, as you'
 
 ## 📝 License
 
-[Add your license information here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🎵 Spotify API Attribution
+
+This application uses the [Spotify Web API](https://developer.spotify.com/documentation/web-api) to access user data and listening statistics. 
+
+**Spotify API Terms**: This application is not affiliated with, endorsed by, or sponsored by Spotify. Spotify and the Spotify logo are trademarks of Spotify AB. Use of the Spotify API is subject to the [Spotify Developer Terms of Service](https://developer.spotify.com/terms).
+
+**Data Usage**: This application only accesses user data that you explicitly authorize through Spotify's OAuth flow. All data is processed locally in your browser and is not stored or transmitted to any third-party servers except Spotify's API.
 
 ## 📧 Contact
 
-[Add contact information here]
+- **Email**: [cmyers5108@gmail.com](mailto:cmyers5108@gmail.com)
+- **GitHub**: [@caleblmyers](https://github.com/caleblmyers)
 
 ---
 
