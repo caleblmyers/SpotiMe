@@ -100,7 +100,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Bar } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -347,6 +347,13 @@ const sortedComparisonData = computed(() => {
     .filter(artist => artist.totalCount > 0)
     .sort((a, b) => b.totalCount - a.totalCount);
 });
+
+// Auto-expand first artist when data becomes available
+watch(sortedComparisonData, (artists) => {
+  if (artists.length > 0 && expandedArtist.value === null) {
+    expandedArtist.value = artists[0].name;
+  }
+}, { immediate: true });
 
 const chartOptions = computed(() => ({
   responsive: true,

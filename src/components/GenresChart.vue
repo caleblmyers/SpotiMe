@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { PolarArea } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -120,7 +120,8 @@ const timeRangeOptions = [
 ];
 
 function handleTimeRangeChange() {
-  // Time range change is handled automatically by the computed ref
+  // Reset expanded state when time range changes so first item auto-expands
+  expandedGenre.value = null;
 }
 
 // Track which genre is expanded
@@ -246,6 +247,13 @@ const sortedGenreData = computed(() => {
     };
   }).sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
 });
+
+// Auto-expand first genre when data becomes available
+watch(sortedGenreData, (genres) => {
+  if (genres.length > 0 && expandedGenre.value === null) {
+    expandedGenre.value = genres[0].name;
+  }
+}, { immediate: true });
 
 const chartOptions = {
   responsive: true,

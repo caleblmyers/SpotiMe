@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { PolarArea } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -120,7 +120,8 @@ const timeRangeOptions = [
 ];
 
 function handleTimeRangeChange() {
-  // Time range change is handled automatically by the computed ref
+  // Reset expanded state when time range changes so first item auto-expands
+  expandedArtist.value = null;
 }
 
 // Track which artist is expanded
@@ -246,6 +247,13 @@ const sortedArtistData = computed(() => {
     };
   }).sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
 });
+
+// Auto-expand first artist when data becomes available
+watch(sortedArtistData, (artists) => {
+  if (artists.length > 0 && expandedArtist.value === null) {
+    expandedArtist.value = artists[0].name;
+  }
+}, { immediate: true });
 
 const chartOptions = {
   responsive: true,

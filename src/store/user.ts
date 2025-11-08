@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import { API_BASE_URL } from "../constants/api";
 import type { SpotifyUser } from "../types/spotify";
+import { getAccessToken } from "../utils/auth";
 
 interface UserState {
   id: string | null;
@@ -9,7 +10,7 @@ interface UserState {
   email: string | null;
   images: Array<{ url: string }> | null;
   accessToken: string | null;
-  isRestoringAuth: boolean; // Add this
+  isRestoringAuth: boolean;
 }
 
 export const useUserStore = defineStore("user", {
@@ -18,12 +19,12 @@ export const useUserStore = defineStore("user", {
     displayName: null,
     email: null,
     images: null,
-    accessToken: localStorage.getItem("spotify_access_token"),
-    isRestoringAuth: false, // Add this
+    accessToken: getAccessToken(),
+    isRestoringAuth: false,
   }),
   getters: {
     isAuthenticated: (state): boolean => {
-      const token = state.accessToken || localStorage.getItem("spotify_access_token");
+      const token = state.accessToken || getAccessToken();
       return !!token && !!state.id;
     },
   },
@@ -42,7 +43,8 @@ export const useUserStore = defineStore("user", {
       }
     },
     async refreshAccessToken(): Promise<string | null> {
-      const refreshToken = localStorage.getItem("spotify_refresh_token");
+      const { getRefreshToken } = await import("../utils/auth");
+      const refreshToken = getRefreshToken();
       if (!refreshToken) {
         this.clearUser();
         return null;
@@ -100,6 +102,7 @@ export const useUserStore = defineStore("user", {
       localStorage.removeItem("spotify_access_token");
       localStorage.removeItem("spotify_refresh_token");
       
+      // Clear profile store as well
       import('./profile').then(({ useProfileStore }) => {
         const profileStore = useProfileStore();
         profileStore.clearProfile();

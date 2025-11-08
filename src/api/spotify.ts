@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useUserStore } from "../store/user";
 import { API_BASE_URL } from "../constants/api";
+import { getAccessToken as getToken } from "../utils/auth";
 
 interface SpotifyApiParams {
   limit?: number;
@@ -9,7 +10,7 @@ interface SpotifyApiParams {
 }
 
 async function getAccessToken(): Promise<string> {
-  const accessToken = localStorage.getItem("spotify_access_token");
+  const accessToken = getToken();
 
   if (!accessToken) {
     throw new Error("No Spotify access token found");

@@ -1,7 +1,14 @@
 <template>
   <div class="w-full max-w-full min-w-0">
+    <!-- Loading State (during auth restoration) -->
+    <LoadingSpinner
+      v-if="isRestoringAuth"
+      message="Loading..."
+      container-class="min-h-[60vh]"
+    />
+
     <!-- Not Authenticated State -->
-    <div v-if="!isAuthenticated" class="flex flex-col items-center justify-center min-h-[60vh]">
+    <div v-else-if="!isAuthenticated" class="flex flex-col items-center justify-center min-h-[60vh]">
       <div class="text-center max-w-md px-4">
         <h1 class="text-2xl font-bold text-gray-900 mb-4">Please log in to view graphs</h1>
         <p class="text-gray-600">Connect your Spotify account to see your listening statistics.</p>
@@ -37,11 +44,11 @@ import ArtistsChart from "../components/ArtistsChart.vue";
 import GenresRadarChart from "../components/GenresRadarChart.vue";
 import RecentlyPlayedComparison from "../components/RecentlyPlayedComparison.vue";
 import PlaylistComparison from "../components/PlaylistComparison.vue";
+import LoadingSpinner from "../components/LoadingSpinner.vue";
 
 const userStore = useUserStore();
 const user = storeToRefs(userStore);
-const { displayName, isAuthenticated } = user;
+const { displayName, isAuthenticated, isRestoringAuth } = user;
 
-// Get full profile data with followers
 const { profile } = useProfile();
 </script>

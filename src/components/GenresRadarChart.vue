@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Radar } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -275,6 +275,14 @@ const topGenresByTimeRange = computed(() => {
       .slice(0, 5); // Top 5 per time range
   });
 });
+
+// Auto-expand first genre of first time range when data becomes available
+watch(topGenresByTimeRange, (genresByRange) => {
+  if (genresByRange.length > 0 && genresByRange[0].length > 0 && expandedGenre.value === null) {
+    const firstGenre = genresByRange[0][0];
+    expandedGenre.value = `0-${firstGenre.name}`;
+  }
+}, { immediate: true });
 
 const chartOptions = {
   responsive: true,

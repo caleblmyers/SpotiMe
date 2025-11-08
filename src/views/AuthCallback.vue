@@ -1,10 +1,7 @@
 <template>
   <div class="flex flex-col items-center justify-center min-h-[400px]">
     <div class="text-center space-y-4">
-      <div v-if="loading" class="space-y-4">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-        <p class="text-gray-600">Completing authentication...</p>
-      </div>
+      <LoadingSpinner v-if="loading" message="Completing authentication..." />
       <div v-else-if="error" class="space-y-4">
         <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
           <p class="text-red-800 font-semibold mb-2">Authentication Failed</p>
@@ -31,6 +28,7 @@
 
 <script lang="ts" setup>
 import { useAuthCallback } from '../composables/useAuthCallback';
+import LoadingSpinner from '../components/LoadingSpinner.vue';
 
 const { loading, error, success, redirectToHome } = useAuthCallback();
 </script>

@@ -1,7 +1,8 @@
 import { ref, watch, type Ref } from 'vue';
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import { API_BASE_URL } from '../constants/api';
 import { useUserStore } from '../store/user';
+import { getAccessToken } from '../utils/auth';
 
 interface CacheEntry<T> {
   data: T;
@@ -9,13 +10,29 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
+interface ApiError {
+  response?: {
+    status?: number;
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+/**
+ * Generate a cache key from endpoint and params
+ */
 function getCacheKey(endpoint: string, params?: Record<string, unknown>): string {
   const paramsStr = params ? JSON.stringify(params) : '';
   return `spotify_api_${endpoint}_${paramsStr}`;
 }
 
+/**
+ * Retrieve cached data if available and not expired
+ */
 function getCachedData<T>(cacheKey: string): T | null {
   try {
     const cached = sessionStorage.getItem(cacheKey);
@@ -33,6 +50,9 @@ function getCachedData<T>(cacheKey: string): T | null {
   }
 }
 
+/**
+ * Store data in cache with expiration
+ */
 function setCachedData<T>(cacheKey: string, data: T): void {
   try {
     const entry: CacheEntry<T> = {
@@ -46,19 +66,10 @@ function setCachedData<T>(cacheKey: string, data: T): void {
   }
 }
 
-export async function makeAuthenticatedRequest<T>(
-  endpoint: string,
-  params?: Record<string, unknown>,
-  useCache = true
-): Promise<T> {
-  const accessToken = localStorage.getItem('spotify_access_token');
-  if (!accessToken) {
-    throw new Error('No Spotify access token found');
-  }
-
-  const user = useUserStore();
-  const spotifyId = user.id;
-
+/**
+ * Create request headers with authentication
+ */
+function createRequestHeaders(accessToken: string, spotifyId: string | null): Record<string, string> {
   const headers: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
   };
@@ -67,57 +78,71 @@ export async function makeAuthenticatedRequest<T>(
     headers['x-spotify-id'] = spotifyId;
   }
 
+  return headers;
+}
+
+/**
+ * Make an HTTP request and cache the response if needed
+ */
+async function makeRequest<T>(
+  endpoint: string,
+  headers: Record<string, string>,
+  params?: Record<string, unknown>,
+  useCache = true
+): Promise<T> {
+  const cacheKey = getCacheKey(endpoint, params);
+
   // Check cache first
   if (useCache) {
-    const cacheKey = getCacheKey(endpoint, params);
     const cached = getCachedData<T>(cacheKey);
     if (cached) {
       return cached;
     }
   }
 
+  // Make the request
+  const res = await axios.get<T>(`${API_BASE_URL}${endpoint}`, {
+    headers,
+    params,
+    withCredentials: true,
+  });
+
+  // Cache the response
+  if (useCache) {
+    setCachedData(cacheKey, res.data);
+  }
+
+  return res.data;
+}
+
+/**
+ * Make an authenticated request with automatic token refresh on 401
+ */
+export async function makeAuthenticatedRequest<T>(
+  endpoint: string,
+  params?: Record<string, unknown>,
+  useCache = true
+): Promise<T> {
+  const accessToken = getAccessToken();
+  if (!accessToken) {
+    throw new Error('No Spotify access token found');
+  }
+
+  const user = useUserStore();
+  const spotifyId = user.id;
+  const headers = createRequestHeaders(accessToken, spotifyId);
+
   try {
-    const res = await axios.get(`${API_BASE_URL}${endpoint}`, {
-      headers,
-      params,
-      withCredentials: true,
-    });
-
-    // Cache the response
-    if (useCache) {
-      const cacheKey = getCacheKey(endpoint, params);
-      setCachedData(cacheKey, res.data);
-    }
-
-    return res.data;
+    return await makeRequest<T>(endpoint, headers, params, useCache);
   } catch (err: unknown) {
-    const error = err as { response?: { status: number }; message?: string };
+    const error = err as AxiosError<ApiError>;
     
-    // Handle 401 - try refreshing token
+    // Handle 401 - try refreshing token and retry
     if (error.response?.status === 401) {
       const newToken = await user.refreshAccessToken();
       if (newToken) {
-        // Retry with new token
-        const retryHeaders: Record<string, string> = {
-          Authorization: `Bearer ${newToken}`,
-        };
-        if (spotifyId) {
-          retryHeaders['x-spotify-id'] = spotifyId;
-        }
-
-        const retryRes = await axios.get(`${API_BASE_URL}${endpoint}`, {
-          headers: retryHeaders,
-          params,
-          withCredentials: true,
-        });
-
-        // Cache the response
-        if (useCache) {
-          const cacheKey = getCacheKey(endpoint, params);
-          setCachedData(cacheKey, retryRes.data);
-        }
-
-        return retryRes.data;
+        const retryHeaders = createRequestHeaders(newToken, spotifyId);
+        return await makeRequest<T>(endpoint, retryHeaders, params, useCache);
       }
     }
 
@@ -125,6 +150,21 @@ export async function makeAuthenticatedRequest<T>(
   }
 }
 
+/**
+ * Extract error message from API error
+ */
+function extractErrorMessage(err: unknown): string {
+  const error = err as AxiosError<ApiError>;
+  return (
+    error.response?.data?.message ||
+    error.message ||
+    'Failed to fetch data'
+  );
+}
+
+/**
+ * Composable for making authenticated API requests with reactive state
+ */
 export function useApi<T>(
   endpoint: string,
   defaultParams?: Record<string, unknown>
@@ -145,11 +185,7 @@ export function useApi<T>(
       const result = await makeAuthenticatedRequest<T>(endpoint, mergedParams, useCache);
       data.value = result;
     } catch (err: unknown) {
-      const errorObj = err as { response?: { data?: { message?: string } }; message?: string };
-      error.value =
-        errorObj.response?.data?.message ||
-        errorObj.message ||
-        'Failed to fetch data';
+      error.value = extractErrorMessage(err);
       console.error(`Error fetching ${endpoint}:`, err);
       data.value = null;
     } finally {
@@ -157,13 +193,12 @@ export function useApi<T>(
     }
   }
 
-  // Watch for token changes and refetch
+  // Watch for token changes and refetch if no data exists
   watch(
-    () => localStorage.getItem('spotify_access_token'),
+    () => getAccessToken(),
     (newToken, oldToken) => {
       if (newToken && newToken !== oldToken && data.value === null) {
-        // Token changed and we don't have data, refetch
-        fetchData(defaultParams, false); // Don't use cache on token change
+        fetchData(defaultParams, false);
       }
     }
   );

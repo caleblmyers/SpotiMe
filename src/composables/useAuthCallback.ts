@@ -3,6 +3,10 @@ import { useRouter } from "vue-router";
 import { parseTokensFromUrl } from "../api/spotify";
 import { useUserStore } from "../store/user";
 
+/**
+ * Composable to handle Spotify OAuth callback
+ * Parses tokens from URL, stores them, and fetches user profile
+ */
 export function useAuthCallback() {
   const router = useRouter();
   const user = useUserStore();
@@ -13,29 +17,22 @@ export function useAuthCallback() {
 
   async function handleCallback(): Promise<void> {
     try {
-      // Parse tokens from URL
       const tokens = parseTokensFromUrl();
 
       if (!tokens) {
         throw new Error("No tokens found in callback URL");
       }
 
-      // Set tokens in localStorage
       user.setSpotifyTokens(tokens.access_token, tokens.refresh_token);
 
-      // Set profile with spotify_id if provided (ensures user.id is set for isAuthenticated check)
+      // Set ID directly if provided to ensure isAuthenticated works before fetching full profile
       if (tokens.spotify_id) {
-        // Set ID directly to ensure isAuthenticated works before fetching full profile
         user.id = tokens.spotify_id;
       }
 
-      // Fetch full profile and wait for it to complete
       await user.fetchSpotifyProfile();
-
-      // Wait for Vue to process all reactivity updates
       await nextTick();
 
-      // Mark as successful and show success message
       loading.value = false;
       success.value = true;
     } catch (err) {
@@ -49,7 +46,6 @@ export function useAuthCallback() {
   }
 
   async function redirectToHome(): Promise<void> {
-    // Ensure state is fully propagated before navigation
     await nextTick();
     router.replace("/");
   }
