@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from "../store/user";
 import { useProfile } from "../composables/useProfile";
@@ -59,4 +59,16 @@ const { profile } = useProfile();
 
 // Time range state
 const timeRange = ref<TimeRange>('short_term');
+
+// Re-check authentication on mount to handle post-auth navigation
+onMounted(async () => {
+  const accessToken = localStorage.getItem("spotify_access_token");
+  if (accessToken && !isAuthenticated.value) {
+    try {
+      await userStore.fetchSpotifyProfile();
+    } catch (err) {
+      console.error("Failed to restore authentication:", err);
+    }
+  }
+});
 </script>

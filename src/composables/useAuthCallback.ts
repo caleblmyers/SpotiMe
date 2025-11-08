@@ -1,4 +1,4 @@
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { parseTokensFromUrl } from "../api/spotify";
 import { useUserStore } from "../store/user";
@@ -32,6 +32,9 @@ export function useAuthCallback() {
       // Fetch full profile and wait for it to complete
       await user.fetchSpotifyProfile();
 
+      // Wait for Vue to process all reactivity updates
+      await nextTick();
+
       // Mark as successful and show success message
       loading.value = false;
       success.value = true;
@@ -45,7 +48,9 @@ export function useAuthCallback() {
     }
   }
 
-  function redirectToHome(): void {
+  async function redirectToHome(): Promise<void> {
+    // Ensure state is fully propagated before navigation
+    await nextTick();
     router.replace("/");
   }
 

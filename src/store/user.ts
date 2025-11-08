@@ -8,6 +8,8 @@ interface UserState {
   displayName: string | null;
   email: string | null;
   images: Array<{ url: string }> | null;
+  // Add accessToken to state for reactivity
+  accessToken: string | null;
 }
 
 export const useUserStore = defineStore("user", {
@@ -16,11 +18,14 @@ export const useUserStore = defineStore("user", {
     displayName: null,
     email: null,
     images: null,
+    // Add accessToken to state for reactivity
+    accessToken: localStorage.getItem("spotify_access_token"),
   }),
   getters: {
     isAuthenticated: (state): boolean => {
-      const accessToken = localStorage.getItem("spotify_access_token");
-      return !!accessToken && !!state.id;
+      // Check both state.accessToken and localStorage as fallback
+      const token = state.accessToken || localStorage.getItem("spotify_access_token");
+      return !!token && !!state.id;
     },
   },
   actions: {
@@ -31,6 +36,8 @@ export const useUserStore = defineStore("user", {
       this.images = profile.images || null;
     },
     setSpotifyTokens(accessToken: string, refreshToken?: string): void {
+      // Update both localStorage and state for reactivity
+      this.accessToken = accessToken;
       localStorage.setItem("spotify_access_token", accessToken);
       if (refreshToken) {
         localStorage.setItem("spotify_refresh_token", refreshToken);
@@ -49,6 +56,8 @@ export const useUserStore = defineStore("user", {
         });
         const newAccessToken = res.data.access_token;
         if (newAccessToken) {
+          // Update both state and localStorage
+          this.accessToken = newAccessToken;
           localStorage.setItem("spotify_access_token", newAccessToken);
           if (res.data.refresh_token) {
             localStorage.setItem(
@@ -93,6 +102,7 @@ export const useUserStore = defineStore("user", {
       this.displayName = null;
       this.email = null;
       this.images = null;
+      this.accessToken = null;
       localStorage.removeItem("spotify_access_token");
       localStorage.removeItem("spotify_refresh_token");
       
