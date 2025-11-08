@@ -120,31 +120,43 @@ This way, you can use the application without needing to be whitelisted, as you'
 
 ## 📸 Gallery
 
-### Dashboard View
+### Main Views
+
+#### Welcome Screen
+![Welcome](./docs/images/welcome.png)
+*Initial welcome screen before authentication*
+
+#### Dashboard
 ![Dashboard](./docs/images/dashboard.png)
-*Main dashboard showing top artists and tracks with time range selector*
+*Dashboard showing top tracks and artists with time range selector*
 
-### Top Artists
-![Top Artists](./docs/images/top-artists.png)
-*Interactive top artists view with expandable detail cards*
+#### Graphs & Analytics
+![Graphs Page](./docs/images/graphs.png)
+*Complete graphs page with all visualization charts*
 
-### Top Tracks
-![Top Tracks](./docs/images/top-tracks.png)
-*Top tracks display with album art and track information*
+### Interactive Charts
 
-### Charts & Analytics
-![Charts](./docs/images/charts.png)
-*Genre and artist distribution charts with time range comparison*
+#### Genre Distribution
+![Genre Chart](./docs/images/genre-chart-breakdown.png)
+*Polar area chart showing genre distribution with expandable breakdown*
 
-### Genre Evolution Radar
+#### Artist Frequency
+![Artist Chart](./docs/images/artist-chart-breakdown.png)
+*Chart showing top artists by track count with expandable track lists*
+
+#### Genre Evolution
 ![Radar Chart](./docs/images/radar-chart.png)
 *Radar chart comparing genre preferences across different time periods*
 
-### Responsive Design
-![Mobile View](./docs/images/mobile-view.png)
-*Fully responsive design optimized for mobile devices*
+### Advanced Features
 
-> **Note**: To add screenshots to the gallery, place image files in the `docs/images/` directory and update the paths above. Recommended image format: PNG or JPG, optimized for web.
+#### Recently Played Comparison
+![Recently Played Comparison](./docs/images/recently-played-comparison.png)
+*Comparison of recently played tracks with top tracks across all time ranges*
+
+#### Playlist Analytics
+![Playlist Comparison](./docs/images/playlist-comparison.png)
+*Analysis showing top tracks and artists representation in user playlists*
 
 ## 📝 License
 
