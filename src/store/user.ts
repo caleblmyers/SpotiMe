@@ -8,8 +8,8 @@ interface UserState {
   displayName: string | null;
   email: string | null;
   images: Array<{ url: string }> | null;
-  // Add accessToken to state for reactivity
   accessToken: string | null;
+  isRestoringAuth: boolean; // Add this
 }
 
 export const useUserStore = defineStore("user", {
@@ -18,12 +18,11 @@ export const useUserStore = defineStore("user", {
     displayName: null,
     email: null,
     images: null,
-    // Add accessToken to state for reactivity
     accessToken: localStorage.getItem("spotify_access_token"),
+    isRestoringAuth: false, // Add this
   }),
   getters: {
     isAuthenticated: (state): boolean => {
-      // Check both state.accessToken and localStorage as fallback
       const token = state.accessToken || localStorage.getItem("spotify_access_token");
       return !!token && !!state.id;
     },
@@ -36,7 +35,6 @@ export const useUserStore = defineStore("user", {
       this.images = profile.images || null;
     },
     setSpotifyTokens(accessToken: string, refreshToken?: string): void {
-      // Update both localStorage and state for reactivity
       this.accessToken = accessToken;
       localStorage.setItem("spotify_access_token", accessToken);
       if (refreshToken) {
@@ -56,7 +54,6 @@ export const useUserStore = defineStore("user", {
         });
         const newAccessToken = res.data.access_token;
         if (newAccessToken) {
-          // Update both state and localStorage
           this.accessToken = newAccessToken;
           localStorage.setItem("spotify_access_token", newAccessToken);
           if (res.data.refresh_token) {
@@ -75,10 +72,9 @@ export const useUserStore = defineStore("user", {
     },
     async fetchSpotifyProfile(): Promise<void> {
       try {
-        // Use profile store to fetch and cache profile data
         const { useProfileStore } = await import('./profile');
         const profileStore = useProfileStore();
-        await profileStore.fetchProfile(true); // Force fetch for auth flows
+        await profileStore.fetchProfile(true);
 
         const profile = profileStore.profile;
         if (!profile || !profile.id) {
@@ -87,12 +83,10 @@ export const useUserStore = defineStore("user", {
 
         this.setSpotifyProfile(profile);
 
-        // Verify the profile was set correctly
         if (!this.id || this.id !== profile.id) {
           throw new Error("Failed to set user profile in store");
         }
       } catch (err: unknown) {
-        // If refresh fails or other error, clear user
         this.clearUser();
         throw err;
       }
@@ -106,7 +100,6 @@ export const useUserStore = defineStore("user", {
       localStorage.removeItem("spotify_access_token");
       localStorage.removeItem("spotify_refresh_token");
       
-      // Clear profile store as well
       import('./profile').then(({ useProfileStore }) => {
         const profileStore = useProfileStore();
         profileStore.clearProfile();

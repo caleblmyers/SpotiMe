@@ -1,7 +1,13 @@
 <template>
   <div class="w-full max-w-full min-w-0">
+    <!-- Loading State (during auth restoration) -->
+    <div v-if="isRestoringAuth" class="flex flex-col items-center justify-center min-h-[400px]">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <p class="mt-4 text-gray-600">Loading...</p>
+    </div>
+
     <!-- Not Authenticated State -->
-    <Welcome v-if="!isAuthenticated" />
+    <Welcome v-else-if="!isAuthenticated" />
 
     <!-- Authenticated State -->
     <div v-else class="space-y-4 h-full flex flex-col">
@@ -52,7 +58,7 @@ import TimeRangeSelector from "../components/TimeRangeSelector.vue";
 
 const userStore = useUserStore();
 const user = storeToRefs(userStore);
-const { displayName, isAuthenticated } = user;
+const { displayName, isAuthenticated, isRestoringAuth } = user;
 
 // Get full profile data with followers
 const { profile } = useProfile();
@@ -63,11 +69,14 @@ const timeRange = ref<TimeRange>('short_term');
 // Re-check authentication on mount to handle post-auth navigation
 onMounted(async () => {
   const accessToken = localStorage.getItem("spotify_access_token");
-  if (accessToken && !isAuthenticated.value) {
+  if (accessToken && !isAuthenticated.value && !isRestoringAuth.value) {
+    userStore.isRestoringAuth = true;
     try {
       await userStore.fetchSpotifyProfile();
     } catch (err) {
       console.error("Failed to restore authentication:", err);
+    } finally {
+      userStore.isRestoringAuth = false;
     }
   }
 });
