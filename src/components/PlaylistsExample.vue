@@ -36,9 +36,9 @@
       <div v-else-if="trackSearchResults" class="mt-2 space-y-2">
         <div
           v-for="playlist in trackSearchResults"
-          :key="playlist.id"
+          :key="'playlist' in playlist ? playlist.playlist.id : playlist.id"
           class="p-2 bg-gray-50 rounded">
-          {{ playlist.name }}
+          {{ 'playlist' in playlist ? playlist.playlist.name : playlist.name }}
         </div>
       </div>
     </div>
@@ -102,8 +102,11 @@ async function analyzeTop() {
 const analyzeResults = computed<PlaylistSearchResult[] | null>(() => {
   if (!searchResults.value || !isAnalyzeMode.value) return null;
   // Check if results have the analyze structure
-  if (searchResults.value.length > 0 && 'top_tracks_count' in searchResults.value[0]) {
-    return searchResults.value as PlaylistSearchResult[];
+  if (searchResults.value.length > 0) {
+    const firstResult = searchResults.value[0];
+    if (firstResult && 'top_tracks_count' in firstResult) {
+      return searchResults.value as PlaylistSearchResult[];
+    }
   }
   return null;
 });

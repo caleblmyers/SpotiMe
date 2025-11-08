@@ -278,9 +278,14 @@ const topGenresByTimeRange = computed(() => {
 
 // Auto-expand first genre of first time range when data becomes available
 watch(topGenresByTimeRange, (genresByRange) => {
-  if (genresByRange.length > 0 && genresByRange[0].length > 0 && expandedGenre.value === null) {
-    const firstGenre = genresByRange[0][0];
-    expandedGenre.value = `0-${firstGenre.name}`;
+  if (genresByRange.length > 0 && expandedGenre.value === null) {
+    const firstTimeRange = genresByRange[0];
+    if (firstTimeRange && firstTimeRange.length > 0) {
+      const firstGenre = firstTimeRange[0];
+      if (firstGenre) {
+        expandedGenre.value = `0-${firstGenre.name}`;
+      }
+    }
   }
 }, { immediate: true });
 

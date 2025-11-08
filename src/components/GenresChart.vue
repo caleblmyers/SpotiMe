@@ -251,7 +251,10 @@ const sortedGenreData = computed(() => {
 // Auto-expand first genre when data becomes available
 watch(sortedGenreData, (genres) => {
   if (genres.length > 0 && expandedGenre.value === null) {
-    expandedGenre.value = genres[0].name;
+    const firstGenre = genres[0];
+    if (firstGenre) {
+      expandedGenre.value = firstGenre.name;
+    }
   }
 }, { immediate: true });
 

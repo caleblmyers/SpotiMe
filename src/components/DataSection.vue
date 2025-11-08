@@ -42,7 +42,7 @@ interface Props {
   onRetry?: () => void;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   loadingMessage: 'Loading...',
   emptyMessage: 'No data found',
   showEmpty: false,

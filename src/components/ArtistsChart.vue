@@ -251,7 +251,10 @@ const sortedArtistData = computed(() => {
 // Auto-expand first artist when data becomes available
 watch(sortedArtistData, (artists) => {
   if (artists.length > 0 && expandedArtist.value === null) {
-    expandedArtist.value = artists[0].name;
+    const firstArtist = artists[0];
+    if (firstArtist) {
+      expandedArtist.value = firstArtist.name;
+    }
   }
 }, { immediate: true });
 
