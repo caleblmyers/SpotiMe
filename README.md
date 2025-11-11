@@ -4,6 +4,38 @@ Visualize your Spotify listening statistics. Discover your top artists, tracks, 
 
 [https://spoti-me.vercel.app/](https://spoti-me.vercel.app/)
 
+### ⚠️ Spotify App Whitelisting
+
+**Important**: Spotify development apps require email whitelisting for authentication.
+
+#### For Live Application
+
+If you're using the deployed version of this application, your Spotify account email must be whitelisted by the application administrator. If you try to authenticate and receive an error, you'll see a helpful error page explaining:
+
+- Your account is not whitelisted
+- How to request access
+- Alternative: Running the app locally with your own Spotify app
+
+#### For Local Development
+
+To avoid whitelisting restrictions, you can run the application locally with your own Spotify Developer App:
+
+1. **Create a Spotify App**:
+   - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+   - Click "Create App"
+   - Fill in app details and accept the terms
+   - Note your `Client ID` and `Client Secret`
+
+2. **Configure Your Backend**:
+   - Update your backend to use your Spotify app credentials
+   - Set the redirect URI to match your local development URL (e.g., `http://localhost:5173/auth/callback`)
+
+3. **Update Environment Variables**:
+   - Configure your backend with your Spotify app's Client ID and Client Secret
+   - Ensure redirect URIs match in both your backend and Spotify app settings
+
+This way, you can use the application without needing to be whitelisted, as you'll be using your own Spotify app credentials.
+
 ## 📖 Description
 
 SpotiMe connects to your Spotify account to provide comprehensive insights into your music listening habits. The app displays your top artists and tracks across different time periods (last 4 weeks, last 6 months, and all time), along with interactive visualizations of your genre preferences and listening patterns.
@@ -77,38 +109,6 @@ For local development, clone and set up the backend API following the instructio
   - `/auth/login-spotify` - Initiate Spotify OAuth
   - `/auth/refresh` - Refresh access token
   - `/auth/callback` - Handle OAuth callback
-
-### ⚠️ Spotify App Whitelisting
-
-**Important**: Spotify development apps require email whitelisting for authentication.
-
-#### For Live Application
-
-If you're using the deployed version of this application, your Spotify account email must be whitelisted by the application administrator. If you try to authenticate and receive an error, you'll see a helpful error page explaining:
-
-- Your account is not whitelisted
-- How to request access
-- Alternative: Running the app locally with your own Spotify app
-
-#### For Local Development
-
-To avoid whitelisting restrictions, you can run the application locally with your own Spotify Developer App:
-
-1. **Create a Spotify App**:
-   - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-   - Click "Create App"
-   - Fill in app details and accept the terms
-   - Note your `Client ID` and `Client Secret`
-
-2. **Configure Your Backend**:
-   - Update your backend to use your Spotify app credentials
-   - Set the redirect URI to match your local development URL (e.g., `http://localhost:5173/auth/callback`)
-
-3. **Update Environment Variables**:
-   - Configure your backend with your Spotify app's Client ID and Client Secret
-   - Ensure redirect URIs match in both your backend and Spotify app settings
-
-This way, you can use the application without needing to be whitelisted, as you'll be using your own Spotify app credentials.
 
 ### First Run
 
