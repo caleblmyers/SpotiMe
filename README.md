@@ -168,8 +168,6 @@ This application uses the [Spotify Web API](https://developer.spotify.com/docume
 
 **Spotify API Terms**: This application is not affiliated with, endorsed by, or sponsored by Spotify. Spotify and the Spotify logo are trademarks of Spotify AB. Use of the Spotify API is subject to the [Spotify Developer Terms of Service](https://developer.spotify.com/terms).
 
-**Data Usage**: This application only accesses user data that you explicitly authorize through Spotify's OAuth flow. All data is processed locally in your browser and is not stored or transmitted to any third-party servers except Spotify's API.
-
 ## 📧 Contact
 
 - **Email**: [cmyers5108@gmail.com](mailto:cmyers5108@gmail.com)
