@@ -6,14 +6,6 @@ Visualize your Spotify listening statistics. Discover your top artists, tracks, 
 
 **Important**: Spotify development apps require email whitelisting for authentication.
 
-#### For Live Application
-
-If you're using the deployed version of this application, your Spotify account email must be whitelisted by the application administrator. If you try to authenticate and receive an error, you'll see a helpful error page explaining:
-
-- Your account is not whitelisted
-- How to request access
-- Alternative: Running the app locally with your own Spotify app
-
 #### For Local Development
 
 To avoid whitelisting restrictions, you can run the application locally with your own Spotify Developer App:
