@@ -2,8 +2,6 @@
 
 Visualize your Spotify listening statistics. Discover your top artists, tracks, and genre preferences with interactive charts and detailed analytics.
 
-[https://spoti-me.vercel.app/](https://spoti-me.vercel.app/)
-
 ### ⚠️ Spotify App Whitelisting
 
 **Important**: Spotify development apps require email whitelisting for authentication.
